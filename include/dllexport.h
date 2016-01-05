@@ -1,5 +1,8 @@
 #pragma once
 
+#define MYTHIC_STRING2(x) #x
+#define MYTHIC_STRING(x) MYTHIC_STRING2(x)
+
 #if defined (_MSC_VER)
 #if defined(EXPORTING_DLL)
 #define MYTHIC_EXPORT __declspec(dllexport)

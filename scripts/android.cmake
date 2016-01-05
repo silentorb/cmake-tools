@@ -1,5 +1,8 @@
+unset(MSVC)
+
 macro(add_library target)
   #  add_custom_target(${target})
+  set(${target}_sources ${ARGN})
   set(${target}_sources ${ARGN} PARENT_SCOPE)
 endmacro()
 
@@ -13,11 +16,27 @@ macro(add_executable target)
   set(application_name ${target} PARENT_SCOPE)
 endmacro()
 
+macro(add_sources)
+  foreach (source ${ARGN})
+    get_filename_component(absolute_path ${source} ABSOLUTE)
+    set(${CURRENT_TARGET}_sources ${${CURRENT_TARGET}_sources} ${absolute_path})
+  endforeach ()
+  set(${CURRENT_TARGET}_sources ${${CURRENT_TARGET}_sources} PARENT_SCOPE)
+endmacro()
+
+macro(add_system_libraries)
+  if (NOT "${ARGN}" STREQUAL "")
+    set(${CURRENT_TARGET}_system_libraries ${${CURRENT_TARGET}_system_libraries} ${ARGN})
+    list(REMOVE_DUPLICATES ${CURRENT_TARGET}_system_libraries)
+    set(${CURRENT_TARGET}_system_libraries ${${CURRENT_TARGET}_system_libraries} PARENT_SCOPE)
+  endif ()
+endmacro()
+
 macro(include_directories)
-    set(${CURRENT_TARGET}_includes ${${CURRENT_TARGET}_includes} ${ARGN})
-    set(${CURRENT_TARGET}_includes ${${CURRENT_TARGET}_includes} ${ARGN} PARENT_SCOPE)
-#      message("  ${CURRENT_TARGET}")
-#  message(${${CURRENT_TARGET}_includes})
+  set(${CURRENT_TARGET}_includes ${${CURRENT_TARGET}_includes} ${ARGN})
+  set(${CURRENT_TARGET}_includes ${${CURRENT_TARGET}_includes} ${ARGN} PARENT_SCOPE)
+  #      message("  ${CURRENT_TARGET}")
+  #  message(${${CURRENT_TARGET}_includes})
 endmacro()
 
 macro(create_library target)
@@ -64,11 +83,9 @@ macro(require)
     #    message("${PROJECT_NAME} require ${library_name}")
     find_package(${library_name} REQUIRED)
 
-    #       add_dependencies(${CURRENT_TARGET}
-    #      ${library_name}
-    #      )
     set(${CURRENT_TARGET}_libraries ${${CURRENT_TARGET}_libraries} ${library_name})
     set(${CURRENT_TARGET}_libraries ${${CURRENT_TARGET}_libraries} PARENT_SCOPE)
+    add_system_libraries(${${library_name}_system_libraries})
   endforeach ()
 endmacro()
 

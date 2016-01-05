@@ -3,21 +3,25 @@
 set(android_includes "")
 
 macro(list_to_string variable list)
-    set(result "")
+  set(result "")
   foreach (item ${list})
-    set(result "${result} ${item}")
+    set(result "${result} \\\n\t${item}")
   endforeach ()
-    set(${variable} ${result})
+  set(${variable} ${result})
 endmacro()
 
 foreach (target ${all_libraries})
   #  set(target_sources ${${target}_sources})
-#  set(target_sources "")
-#  foreach (source ${${target}_sources})
-#    set(target_sources "${target_sources} ${source}")
-#  endforeach ()
-#    message(${${target}_includes})
-    list(REMOVE_DUPLICATES ${target}_includes)
+  #  set(target_sources "")
+  #  foreach (source ${${target}_sources})
+  #    set(target_sources "${target_sources} ${source}")
+  #  endforeach ()
+#      message(${${target}_includes})
+  list(REMOVE_DUPLICATES ${target}_includes)
+#    message("${target} ${${target}_system_libraries}")
+#  if (${target}_system_libraries)
+#    list(REMOVE_DUPLICATES ${target}_system_libraries)
+#  endif ()
   list_to_string(target_sources "${${target}_sources}")
   list_to_string(target_includes "${${target}_includes}")
 
@@ -33,7 +37,7 @@ foreach (target ${all_libraries})
     set(target_libraries "${target_libraries} ${library}")
   endforeach ()
 
-#  message("library ${target}  ${${target}_libraries}")
+  #  message("library ${target}  ${${target}_libraries}")
 
   configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/templates/jni/Android.mk

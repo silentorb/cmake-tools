@@ -178,10 +178,10 @@ macro(add_resources resources_dir)
     #SET_TARGET_PROPERTIES("${CURRENT_TARGET}_resources" PROPERTIES LINKER_LANGUAGE C)
     set(ALL_RESOURCES "${ALL_RESOURCES} BUNDLE_RESOURCES" PARENT_SCOPE)
   else ()
-
+#MESSAGE(WARNING "${CMAKE_CURRENT_LIST_DIR}/${resource_dir} $<TARGET_FILE_DIR:${CURRENT_TARGET}>/${resources_dir}")
     add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_directory
-      ${CMAKE_CURRENT_LIST_DIR}/${resource_dir} $TARGET_FILE_DIR_${CURRENT_TARGET}/${resource_dir})
+      ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} $<TARGET_FILE_DIR:${CURRENT_TARGET}>/${resources_dir})
   endif ()
 
 endmacro(add_resources)
@@ -189,3 +189,7 @@ endmacro(add_resources)
 macro(finish_mythic)
 
 endmacro(finish_mythic)
+
+macro(add_sources)
+  target_sources(${CURRENT_TARGET} PUBLIC ${ARGN})
+endmacro()
