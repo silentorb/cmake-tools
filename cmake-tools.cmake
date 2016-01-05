@@ -1,9 +1,9 @@
-set(CMAKE_UTILITY ${CMAKE_CURRENT_LIST_DIR})
-include(${CMAKE_UTILITY}/scripts/print-info.cmake)
+set(CMAKE_TOOLS ${CMAKE_CURRENT_LIST_DIR})
+include(${CMAKE_TOOLS}/scripts/print-info.cmake)
 
 if (ANDROID)
-    include(${CMAKE_UTILITY}/scripts/android.cmake)
+    include(${CMAKE_TOOLS}/scripts/android.cmake)
 else ()
-  include(${CMAKE_UTILITY}/scripts/project.cmake)
+  include(${CMAKE_TOOLS}/scripts/project.cmake)
 endif ()
 

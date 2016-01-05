@@ -17,11 +17,11 @@ macro(create_library target)
     add_library(${target} ${ARGN})
   endif ()
 
-  if (NOT ANDROID)
-    set("TARGET_FILE_DIR_${target}" $<TARGET_FILE_DIR:${target}>)
-    set("TARGET_LINKER_FILE_${target}" $<TARGET_LINKER_FILE:${target}>)
-    set("TARGET_FILE_${target}" $<TARGET_FILE:${target}>)
-  endif ()
+#  if (NOT ANDROID)
+#    set("TARGET_FILE_DIR_${target}" $<TARGET_FILE_DIR:${target}>)
+##    set("TARGET_LINKER_FILE_${target}" $<TARGET_LINKER_FILE:${target}>)
+#    set("TARGET_FILE_${target}" $<TARGET_FILE:${target}>)
+#  endif ()
 
   string(LENGTH "${CMAKE_SOURCE_DIR}" string_length)
   math(EXPR string_length "${string_length} + 1")
@@ -32,7 +32,7 @@ macro(create_library target)
   endif ()
   #      message( "${current_path} ${temp}")
 
-  include_directories(${CMAKE_UTILITY}/include) # for dllexport
+  include_directories(${CMAKE_TOOLS}/include) # for dllexport
 
   if (IOS)
     set_xcode_property(${target} IPHONEOS_DEPLOYMENT_TARGET "8.0")
@@ -80,7 +80,7 @@ macro(require)
         )
     elseif (NOT ANDROID)
       target_link_libraries(${CURRENT_TARGET}
-        $TARGET_LINKER_FILE_${library_name}
+        $<TARGET_LINKER_FILE:${library_name}>
         )
     endif ()
 
@@ -141,15 +141,13 @@ else ()
   macro(require_package project_name library_name)
     find_package(${library_name} REQUIRED)
 
-    if (NOT ANDROID)
       target_link_libraries(${project_name}
-        $TARGET_LINKER_FILE_${library_name}
+        $<TARGET_LINKER_FILE:${library_name}>
         )
 
       add_dependencies(${project_name}
         ${library_name}
         )
-    endif ()
 
   endmacro(require_package)
 

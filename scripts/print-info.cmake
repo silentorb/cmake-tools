@@ -1,5 +1,6 @@
 
-function(print_info mode)
+function(print_info)
+  set(mode ${ARG1})
   # if you are building in-source, this is the same as CMAKE_SOURCE_DIR, otherwise
   # this is the top level directory of your build tree
   MESSAGE(${mode} "CMAKE_BINARY_DIR:         " ${CMAKE_BINARY_DIR})
