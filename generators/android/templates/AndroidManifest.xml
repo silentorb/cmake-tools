@@ -6,7 +6,7 @@
         android:versionName="1.0">
 
     <!-- This is the platform API where NativeActivity was introduced. -->
-    <uses-sdk android:minSdkVersion="9" />
+    <uses-sdk android:minSdkVersion="15" />
 
     <!-- This .apk has no Java code itself, so set hasCode to false. -->
     <application android:label="${application_name}" android:hasCode="false"
@@ -19,7 +19,7 @@
                 android:configChanges="orientation|keyboardHidden">
             <!-- Tell NativeActivity the name of or .so -->
             <meta-data android:name="android.app.lib_name"
-                    android:value="native-activity" />
+                    android:value="${application_entry_lib}" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

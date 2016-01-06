@@ -65,11 +65,30 @@ configure_file(
 )
 
 configure_file(
-  ${CMAKE_CURRENT_LIST_DIR}/templates/build.bat
-  ${CMAKE_BINARY_DIR}/build.bat
+  ${CMAKE_CURRENT_LIST_DIR}/templates/build.ps1
+  ${CMAKE_BINARY_DIR}/build.ps1
+)
+
+configure_file(
+  ${CMAKE_CURRENT_LIST_DIR}/templates/debug.bat
+  ${CMAKE_BINARY_DIR}/debug.bat
 )
 
 configure_file(
   ${CMAKE_CURRENT_LIST_DIR}/templates/.gitignore
   ${CMAKE_BINARY_DIR}/.gitignore
+)
+
+# Project files
+
+set(DOLLAR_SIGN "$")
+
+configure_file(
+  ${CMAKE_CURRENT_LIST_DIR}/templates/project/build.xml
+  ${CMAKE_BINARY_DIR}/build.xml
+)
+
+configure_file(
+  ${CMAKE_CURRENT_LIST_DIR}/templates/project/project.properties
+  ${CMAKE_BINARY_DIR}/project.properties
 )
