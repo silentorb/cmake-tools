@@ -10,18 +10,20 @@ macro(list_to_string variable list)
   set(${variable} ${result})
 endmacro()
 
+set(all_system_libraries "")
+set(temp_libraries "")
+
 foreach (target ${all_libraries})
-  #  set(target_sources ${${target}_sources})
-  #  set(target_sources "")
-  #  foreach (source ${${target}_sources})
-  #    set(target_sources "${target_sources} ${source}")
-  #  endforeach ()
-#      message(${${target}_includes})
+  foreach (library ${${target}_system_libraries})
+    if (NOT ${library} IN_LIST temp_libraries)
+      set(temp_libraries temp_libraries library)
+      set(all_system_libraries "${all_system_libraries} -l${library}")
+    endif ()
+  endforeach ()
+endforeach ()
+
+foreach (target ${all_libraries})
   list(REMOVE_DUPLICATES ${target}_includes)
-#    message("${target} ${${target}_system_libraries}")
-#  if (${target}_system_libraries)
-#    list(REMOVE_DUPLICATES ${target}_system_libraries)
-#  endif ()
   list_to_string(target_sources "${${target}_sources}")
   list_to_string(target_includes "${${target}_includes}")
 
@@ -39,8 +41,14 @@ foreach (target ${all_libraries})
 
   #  message("library ${target}  ${${target}_libraries}")
 
+  if (${${target}_is_executable})
+    set(template_name front)
+  else ()
+    set(template_name library)
+  endif ()
+
   configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/templates/jni/Android.mk
+    ${CMAKE_CURRENT_LIST_DIR}/templates/jni/Android.${template_name}.mk
     ${CMAKE_BINARY_DIR}/jni/${target_relative_path}/Android.mk
   )
 

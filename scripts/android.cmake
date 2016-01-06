@@ -12,8 +12,11 @@ endmacro()
 
 macro(add_executable target)
   #  add_custom_target(${target})
-  set(${target}_sources ${ARGN} PARENT_SCOPE)
+  #  set(${target}_sources ${ARGN} PARENT_SCOPE)
+  create_library(${target} ${ARGN})
+  set(${target}_is_executable 1 PARENT_SCOPE)
   set(application_name ${target} PARENT_SCOPE)
+
 endmacro()
 
 macro(add_sources)
