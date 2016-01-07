@@ -81,4 +81,5 @@
     <!-- version-tag: 1 -->
     <import file="${DOLLAR_SIGN}{sdk.dir}/tools/ant/build.xml" />
 
+    ${build_additional}
 </project>

@@ -1,6 +1,7 @@
 
 #  message("a ${quartz_sources}")
 set(android_includes "")
+set(all_resources "")
 
 macro(list_to_string variable list)
   set(result "")
@@ -53,8 +54,11 @@ foreach (target ${all_libraries})
   )
 
   set(android_includes "${android_includes}\ninclude jni/${target_relative_path}/Android.mk")
-  #  print_info()
-  #
+
+#    message("${target} ${${target}_resources_dir}")
+  if (NOT "${${target}_resources_dir}" STREQUAL "")
+    list(APPEND all_resources ${${target}_resources_dir})
+  endif ()
 endforeach ()
 
 configure_file(
@@ -90,6 +94,15 @@ configure_file(
 # Project files
 
 set(DOLLAR_SIGN "$")
+set(build_additional "")
+
+foreach (resource_dir ${all_resources})
+set(build_additional "${build_additional}\n\
+<copy todir=\"${CMAKE_BINARY_DIR}/assets\" >\n\
+        <fileset dir=\"${resource_dir}\" includes=\"**\"/>\n\
+ </copy>\
+")
+endforeach ()
 
 configure_file(
   ${CMAKE_CURRENT_LIST_DIR}/templates/project/build.xml

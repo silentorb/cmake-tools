@@ -110,31 +110,7 @@ macro(add name)
 endmacro(add)
 
 macro(add_resources resources_dir)
-
-  if (IOS)
-    file(GLOB_RECURSE BUNDLE_RESOURCES ${resources_dir}/*)
-    add_executable("${CURRENT_TARGET}_resources" MACOSX_BUNDLE ${BUNDLE_RESOURCES})
-    get_filename_component(base_path ${resources_dir} ABSOLUTE)
-
-    foreach (resource_path ${BUNDLE_RESOURCES})
-      #message("hello ${base_path}, ${resource_path}")
-      get_filename_component(resource_dir ${resource_path} DIRECTORY)
-      get_relative_path(relative_dir ${base_path} ${resource_dir})
-      message("resource ${resource_path}")
-      message("resource ${relative_dir}")
-      #set_source_files_properties(${BUNDLE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-
-    endforeach ()
-    #set_source_files_properties(${BUNDLE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    #SET_TARGET_PROPERTIES("${CURRENT_TARGET}_resources" PROPERTIES LINKER_LANGUAGE C)
-    set(ALL_RESOURCES "${ALL_RESOURCES} BUNDLE_RESOURCES" PARENT_SCOPE)
-  else ()
-
-    #    add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
-    #      COMMAND ${CMAKE_COMMAND} -E copy_directory
-    #      ${CMAKE_CURRENT_LIST_DIR}/${resource_dir} $TARGET_FILE_DIR_${CURRENT_TARGET}/${resource_dir})
-  endif ()
-
+  set(${CURRENT_TARGET}_resources_dir ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} PARENT_SCOPE)
 endmacro(add_resources)
 
 macro(finish_mythic)
