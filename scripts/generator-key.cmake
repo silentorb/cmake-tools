@@ -1,4 +1,4 @@
-if (MINGW OR ${CMAKE_GENERATOR} STREQUAL "MinGW Makefiles")
+if (MINGW)
   SET(GENERATOR_KEY mingw)
 elseif (MSVC)
   SET(GENERATOR_KEY msvc)
