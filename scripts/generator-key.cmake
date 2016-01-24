@@ -1,0 +1,7 @@
+if (MINGW OR ${CMAKE_GENERATOR} STREQUAL "MinGW Makefiles")
+  SET(GENERATOR_KEY mingw)
+elseif (MSVC)
+  SET(GENERATOR_KEY msvc)
+else ()
+  message(FATAL_ERROR "Unsupported Generator.")
+endif ()
