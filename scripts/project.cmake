@@ -17,20 +17,23 @@ macro(create_library target)
     add_library(${target} ${ARGN})
   endif ()
 
-#  if (NOT ANDROID)
-#    set("TARGET_FILE_DIR_${target}" $<TARGET_FILE_DIR:${target}>)
-##    set("TARGET_LINKER_FILE_${target}" $<TARGET_LINKER_FILE:${target}>)
-#    set("TARGET_FILE_${target}" $<TARGET_FILE:${target}>)
-#  endif ()
+  #  if (NOT ANDROID)
+  #    set("TARGET_FILE_DIR_${target}" $<TARGET_FILE_DIR:${target}>)
+  ##    set("TARGET_LINKER_FILE_${target}" $<TARGET_LINKER_FILE:${target}>)
+  #    set("TARGET_FILE_${target}" $<TARGET_FILE:${target}>)
+  #  endif ()
 
-  string(LENGTH "${CMAKE_SOURCE_DIR}" string_length)
-  math(EXPR string_length "${string_length} + 1")
-  string(SUBSTRING ${CMAKE_CURRENT_SOURCE_DIR} ${string_length} -1 current_path)
-  get_filename_component(current_path ${current_path} DIRECTORY)
-  if (NOT ANDROID)
-    set_target_properties(${target} PROPERTIES FOLDER ${current_path})
+  if (NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    string(LENGTH "${CMAKE_SOURCE_DIR}" string_length)
+    math(EXPR string_length "${string_length} + 1")
+    message("test ${CMAKE_CURRENT_SOURCE_DIR}")
+    string(SUBSTRING ${CMAKE_CURRENT_SOURCE_DIR} ${string_length} -1 current_path)
+    get_filename_component(current_path ${current_path} DIRECTORY)
+    if (NOT ANDROID)
+      set_target_properties(${target} PROPERTIES FOLDER ${current_path})
+    endif ()
+    #      message( "${current_path} ${temp}")
   endif ()
-  #      message( "${current_path} ${temp}")
 
   include_directories(${CMAKE_TOOLS}/include) # for dllexport
 
@@ -59,11 +62,13 @@ macro(create_test target)
     ${CMAKE_CURRENT_LIST_DIR}/test
   )
 
-  string(LENGTH "${CMAKE_SOURCE_DIR}" string_length)
-  math(EXPR string_length "${string_length} + 1")
-  string(SUBSTRING ${CMAKE_CURRENT_SOURCE_DIR} ${string_length} -1 current_path)
-  get_filename_component(current_path ${current_path} DIRECTORY)
-  set_target_properties(${target} PROPERTIES FOLDER ${current_path})
+  if (NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    string(LENGTH "${CMAKE_SOURCE_DIR}" string_length)
+    math(EXPR string_length "${string_length} + 1")
+    string(SUBSTRING ${CMAKE_CURRENT_SOURCE_DIR} ${string_length} -1 current_path)
+    get_filename_component(current_path ${current_path} DIRECTORY)
+    set_target_properties(${target} PROPERTIES FOLDER ${current_path})
+  endif ()
 
   require(${LAST_TEST})
 
@@ -132,7 +137,11 @@ else ()
 
     project(${project_name})
 
-    set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR} PARENT_SCOPE)
+    if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+      set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR})
+    else ()
+      set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR} PARENT_SCOPE)
+    endif ()
 
     include(${project_name}-config.cmake)
 
@@ -141,13 +150,13 @@ else ()
   macro(require_package project_name library_name)
     find_package(${library_name} REQUIRED)
 
-      target_link_libraries(${project_name}
-        $<TARGET_LINKER_FILE:${library_name}>
-        )
+    target_link_libraries(${project_name}
+      $<TARGET_LINKER_FILE:${library_name}>
+      )
 
-      add_dependencies(${project_name}
-        ${library_name}
-        )
+    add_dependencies(${project_name}
+      ${library_name}
+      )
 
   endmacro(require_package)
 
@@ -178,7 +187,7 @@ macro(add_resources resources_dir)
     #SET_TARGET_PROPERTIES("${CURRENT_TARGET}_resources" PROPERTIES LINKER_LANGUAGE C)
     set(ALL_RESOURCES "${ALL_RESOURCES} BUNDLE_RESOURCES" PARENT_SCOPE)
   else ()
-#MESSAGE(WARNING "${CMAKE_CURRENT_LIST_DIR}/${resource_dir} $<TARGET_FILE_DIR:${CURRENT_TARGET}>/${resources_dir}")
+    #MESSAGE(WARNING "${CMAKE_CURRENT_LIST_DIR}/${resource_dir} $<TARGET_FILE_DIR:${CURRENT_TARGET}>/${resources_dir}")
     add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy_directory
       ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} $<TARGET_FILE_DIR:${CURRENT_TARGET}>/${resources_dir})
