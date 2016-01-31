@@ -26,7 +26,6 @@ macro(create_library target)
   if (NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     string(LENGTH "${CMAKE_SOURCE_DIR}" string_length)
     math(EXPR string_length "${string_length} + 1")
-    message("test ${CMAKE_CURRENT_SOURCE_DIR}")
     string(SUBSTRING ${CMAKE_CURRENT_SOURCE_DIR} ${string_length} -1 current_path)
     get_filename_component(current_path ${current_path} DIRECTORY)
     if (NOT ANDROID)
@@ -201,4 +200,47 @@ endmacro(finish_mythic)
 
 macro(add_sources)
   target_sources(${CURRENT_TARGET} PUBLIC ${ARGN})
+endmacro()
+
+function(set_lib_prefix varname)
+  string(SUBSTRING "${${varname}}" 0 3 libprefix)
+#  message(WARNING "substring ${libprefix} ${libname}")
+  if (NOT libprefix STREQUAL "lib")
+    set(${varname} "lib${${varname}}" PARENT_SCOPE)
+  endif ()
+endfunction()
+
+macro(link_external path)
+#  message(WARNING "args... ${ARGV0} ${ARGV1}")
+  set(libname "${ARGV1}")
+  if (NOT libname)
+#    message(WARNING "args 2")
+    set(libname ${path})
+  endif ()
+
+  set(dllname "${ARGV2}")
+  if (NOT dllname)
+    set(dllname ${libname})
+  endif ()
+
+  if (MINGW)
+    set(libname "${libname}.dll.a")
+
+    set_lib_prefix(libname)
+    set_lib_prefix(dllname)
+#    string(SUBSTRING "${libname}" 0 3 libprefix)
+#    message(WARNING "substring ${libprefix} ${libname}")
+#    if (NOT libprefix STREQUAL "lib")
+#      set(libname "lib${libname}")
+#    endif ()
+
+  elseif (MSVC)
+    set(libname "${libname}.lib")
+  endif ()
+
+  target_link_libraries(${CURRENT_TARGET} ${MYTHIC_DEPENDENCIES}/${path}/lib/${libname})
+
+  add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${MYTHIC_DEPENDENCIES}/${path}/bin/${dllname}.dll $<TARGET_FILE_DIR:${CURRENT_TARGET}>
+    )
 endmacro()
