@@ -1,3 +1,9 @@
+if (${IOS})
+  add_definitions(-DIOS=1)
+  set(BUILD_SHARED_LIBS OFF)
+else ()
+  set(BUILD_SHARED_LIBS true)
+endif ()
 
 macro(create_library target)
   set(CURRENT_TARGET ${target})
