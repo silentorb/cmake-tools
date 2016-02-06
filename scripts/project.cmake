@@ -216,11 +216,26 @@ function(set_lib_prefix varname)
   endif ()
 endfunction()
 
-macro(link_external path)
-#  message(WARNING "args... ${ARGV0} ${ARGV1}")
+macro(link_external_static path)
   set(libname "${ARGV1}")
   if (NOT libname)
-#    message(WARNING "args 2")
+    set(libname ${path})
+  endif ()
+
+  if (MINGW)
+    set(libname "${libname}.dll.a")
+    set_lib_prefix(libname)
+  elseif (MSVC)
+    set(libname "${libname}.lib")
+  endif ()
+
+  target_link_libraries(${CURRENT_TARGET} ${MYTHIC_DEPENDENCIES}/${path}/lib/${libname})
+
+endmacro()
+
+macro(link_external path)
+  set(libname "${ARGV1}")
+  if (NOT libname)
     set(libname ${path})
   endif ()
 
@@ -230,21 +245,10 @@ macro(link_external path)
   endif ()
 
   if (MINGW)
-    set(libname "${libname}.dll.a")
-
-    set_lib_prefix(libname)
     set_lib_prefix(dllname)
-#    string(SUBSTRING "${libname}" 0 3 libprefix)
-#    message(WARNING "substring ${libprefix} ${libname}")
-#    if (NOT libprefix STREQUAL "lib")
-#      set(libname "lib${libname}")
-#    endif ()
-
-  elseif (MSVC)
-    set(libname "${libname}.lib")
   endif ()
 
-  target_link_libraries(${CURRENT_TARGET} ${MYTHIC_DEPENDENCIES}/${path}/lib/${libname})
+  link_external_static(${path} ${libname})
 
   add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${MYTHIC_DEPENDENCIES}/${path}/bin/${dllname}.dll $<TARGET_FILE_DIR:${CURRENT_TARGET}>
