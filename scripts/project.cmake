@@ -209,10 +209,16 @@ macro(add_sources)
 endmacro()
 
 function(set_lib_prefix varname)
-  string(SUBSTRING "${${varname}}" 0 3 libprefix)
-#  message(WARNING "substring ${libprefix} ${libname}")
-  if (NOT libprefix STREQUAL "lib")
-    set(${varname} "lib${${varname}}" PARENT_SCOPE)
+  set(path "${ARGV1}")
+#    message(WARNING "${${varname}} ${path}")
+  if (path AND EXISTS ${path}/${${varname}})
+
+  else ()
+    string(SUBSTRING "${${varname}}" 0 3 libprefix)
+    #  message(WARNING "substring ${libprefix} ${libname}")
+    if (NOT libprefix STREQUAL "lib")
+      set(${varname} "lib${${varname}}" PARENT_SCOPE)
+    endif ()
   endif ()
 endfunction()
 
@@ -244,13 +250,15 @@ macro(link_external path)
     set(dllname ${libname})
   endif ()
 
+  set(dllname "${dllname}.dll")
+
   if (MINGW)
-    set_lib_prefix(dllname)
+    set_lib_prefix(dllname ${MYTHIC_DEPENDENCIES}/${path}/bin)
   endif ()
 
   link_external_static(${path} ${libname})
 
   add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${MYTHIC_DEPENDENCIES}/${path}/bin/${dllname}.dll $<TARGET_FILE_DIR:${CURRENT_TARGET}>
+    COMMAND ${CMAKE_COMMAND} -E copy ${MYTHIC_DEPENDENCIES}/${path}/bin/${dllname} $<TARGET_FILE_DIR:${CURRENT_TARGET}>
     )
 endmacro()
