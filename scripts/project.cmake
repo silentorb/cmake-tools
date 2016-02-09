@@ -210,7 +210,8 @@ endmacro()
 
 function(set_lib_prefix varname)
   set(path "${ARGV1}")
-#    message(WARNING "${${varname}} ${path}")
+
+  #    message(WARNING "${${varname}} ${path}")
   if (path AND EXISTS ${path}/${${varname}})
 
   else ()
@@ -222,20 +223,60 @@ function(set_lib_prefix varname)
   endif ()
 endfunction()
 
+function(doctor_libname varname is_dynamic path)
+  #  set(path "${ARGV2}")
+  set(name ${${varname}})
+
+  if (is_dynamic)
+    if (MSVC OR MINGW)
+      set(extension "dll")
+    else ()
+      set(extension "a")
+    endif ()
+  else ()
+    if (MSVC)
+      set(extension "lib")
+    else ()
+      set(extension "dll.a")
+    endif ()
+
+  endif ()
+#  message("${path} ${name} ${extension}")
+  if (path AND EXISTS ${path}/${name}.${extension})
+  else ()
+    string(SUBSTRING "${name}" 0 3 libprefix)
+    if (NOT libprefix STREQUAL "lib")
+      set(name "lib${name}")
+    endif ()
+  endif ()
+
+  if (MSVC AND path)
+    if (EXISTS ${path}/${name}d.${extension})
+      set(name "${name}d")
+    endif ()
+  endif ()
+
+  set(${varname} "${name}.${extension}" PARENT_SCOPE)
+
+endfunction()
+
 macro(link_external_static path)
   set(libname "${ARGV1}")
   if (NOT libname)
     set(libname ${path})
   endif ()
 
-  if (MINGW)
-    set(libname "${libname}.dll.a")
-    set_lib_prefix(libname)
-  elseif (MSVC)
-    set(libname "${libname}.lib")
-  endif ()
+  set(fullpath ${MYTHIC_DEPENDENCIES}/${path}/lib)
 
-  target_link_libraries(${CURRENT_TARGET} ${MYTHIC_DEPENDENCIES}/${path}/lib/${libname})
+  doctor_libname(libname FALSE ${fullpath})
+  #  if (MINGW)
+  #    set(libname "${libname}.dll.a")
+  #    set_lib_prefix(libname)
+  #  elseif (MSVC)
+  #    set(libname "${libname}.lib")
+  #  endif ()
+
+  target_link_libraries(${CURRENT_TARGET} ${fullpath}/${libname})
 
 endmacro()
 
@@ -250,15 +291,18 @@ macro(link_external path)
     set(dllname ${libname})
   endif ()
 
-  set(dllname "${dllname}.dll")
-
-  if (MINGW)
-    set_lib_prefix(dllname ${MYTHIC_DEPENDENCIES}/${path}/bin)
-  endif ()
+  #  set(dllname "${dllname}.dll")
+  #
+  #  if (MINGW)
+  #    set_lib_prefix(dllname ${MYTHIC_DEPENDENCIES}/${path}/bin)
+  #  endif ()
 
   link_external_static(${path} ${libname})
 
+  set(fullpath "${MYTHIC_DEPENDENCIES}/${path}/bin")
+  doctor_libname(dllname TRUE ${fullpath})
+
   add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${MYTHIC_DEPENDENCIES}/${path}/bin/${dllname} $<TARGET_FILE_DIR:${CURRENT_TARGET}>
+    COMMAND ${CMAKE_COMMAND} -E copy ${fullpath}/${dllname} $<TARGET_FILE_DIR:${CURRENT_TARGET}>
     )
 endmacro()
