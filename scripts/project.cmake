@@ -15,10 +15,11 @@ macro(create_library target)
 
   if ("${ARGN}" STREQUAL "")
     #    message("No sources for ${target}")
-    file(GLOB_RECURSE SOURCES source/*.cpp source/*.mm source/*.m source/*.c)
+    file(GLOB_RECURSE CURRENT_SOURCES source/*.cpp source/*.mm source/*.m source/*.c)
 
     file(GLOB_RECURSE HEADERS source/*.h)
-    add_library(${target} ${SOURCES} ${HEADERS})
+    set(CURRENT_SOURCES ${CURRENT_SOURCES} PARENT_SCOPE)
+    add_library(${target} ${CURRENT_SOURCES} ${HEADERS})
   else ()
     add_library(${target} ${ARGN})
   endif ()
@@ -174,8 +175,8 @@ endmacro(add)
 
 macro(add_resources resources_dir)
 
+  file(GLOB_RECURSE BUNDLE_RESOURCES ${resources_dir}/*)
   if (IOS)
-    file(GLOB_RECURSE BUNDLE_RESOURCES ${resources_dir}/*)
     add_executable("${CURRENT_TARGET}_resources" MACOSX_BUNDLE ${BUNDLE_RESOURCES})
     get_filename_component(base_path ${resources_dir} ABSOLUTE)
 
@@ -193,9 +194,33 @@ macro(add_resources resources_dir)
     set(ALL_RESOURCES "${ALL_RESOURCES} BUNDLE_RESOURCES" PARENT_SCOPE)
   else ()
     #MESSAGE(WARNING "${CMAKE_CURRENT_LIST_DIR}/${resource_dir} $<TARGET_FILE_DIR:${CURRENT_TARGET}>/${resources_dir}")
-    add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
+
+    #    add_custom_target(
+    #      ${CURRENT_TARGET}_resources
+    #      DEPENDS ${BUNDLE_RESOURCES}
+    #      VERBATIM
+    #    )
+
+    #    add_dependencies(${CURRENT_TARGET} ${CURRENT_TARGET}_resources)
+    list(GET CURRENT_SOURCES 0 FIRST_SOURCE)
+#    message("${CURRENT_SOURCES}")
+#    message("first: ${FIRST_SOURCE}")
+#      message("${BUNDLE_RESOURCES}")
+    set_source_files_properties(${FIRST_SOURCE} PROPERTIES OBJECT_DEPENDS "${BUNDLE_RESOURCES}")
+
+    add_custom_command(TARGET ${CURRENT_TARGET}
       COMMAND ${CMAKE_COMMAND} -E copy_directory
-      ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} $<TARGET_FILE_DIR:${CURRENT_TARGET}>/${resources_dir})
+      ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} $<TARGET_FILE_DIR:${CURRENT_TARGET}>/${resources_dir}
+      COMMENT "Copying ${CURRENT_TARGET} files"
+      )
+
+    #    get_property(output_dir TARGET ${CURRENT_TARGET} PROPERTY LOCATION)
+    #message("$<TARGET_FILE_DIR:${CURRENT_TARGET}>/$")
+    #      print_info()
+    #    file(COPY
+    #      ${CMAKE_CURRENT_LIST_DIR}/${resources_dir}
+    #      DESTINATION ${EXECUTABLE_OUTPUT_PATH}/${resources_dir}
+    #      )
   endif ()
 
 endmacro(add_resources)
@@ -241,7 +266,7 @@ function(doctor_libname varname is_dynamic path)
     endif ()
 
   endif ()
-#  message("${path} ${name} ${extension}")
+  #  message("${path} ${name} ${extension}")
   if (path AND EXISTS ${path}/${name}.${extension})
   else ()
     string(SUBSTRING "${name}" 0 3 libprefix)
