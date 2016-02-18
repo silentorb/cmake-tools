@@ -12,3 +12,10 @@
 #else /* defined (_WIN32) */
 #define MYTHIC_EXPORT
 #endif
+
+class no_copy {
+public:
+    no_copy(no_copy const&) = delete;
+    no_copy& operator=(no_copy const&) = delete;
+    no_copy() {}
+};
