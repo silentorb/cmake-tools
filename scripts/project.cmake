@@ -316,12 +316,6 @@ macro(link_external path)
     set(dllname ${libname})
   endif ()
 
-  #  set(dllname "${dllname}.dll")
-  #
-  #  if (MINGW)
-  #    set_lib_prefix(dllname ${MYTHIC_DEPENDENCIES}/${path}/bin)
-  #  endif ()
-
   link_external_static(${path} ${libname})
 
   set(fullpath "${MYTHIC_DEPENDENCIES}/${path}/bin")
