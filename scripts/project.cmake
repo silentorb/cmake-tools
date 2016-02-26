@@ -15,7 +15,11 @@ macro(create_library target)
 
   if ("${ARGN}" STREQUAL "")
     #    message("No sources for ${target}")
-    file(GLOB_RECURSE CURRENT_SOURCES source/*.cpp source/*.mm source/*.m source/*.c)
+    if (IOS)
+      file(GLOB_RECURSE CURRENT_SOURCES source/*.cpp source/*.mm source/*.m source/*.c)
+    else()
+      file(GLOB_RECURSE CURRENT_SOURCES source/*.cpp source/*.c)
+    endif()
 
     file(GLOB_RECURSE HEADERS source/*.h)
     set(CURRENT_SOURCES ${CURRENT_SOURCES} PARENT_SCOPE)
@@ -177,7 +181,8 @@ macro(add_resources resources_dir)
 
   file(GLOB_RECURSE BUNDLE_RESOURCES ${resources_dir}/*)
   if (IOS)
-    add_executable("${CURRENT_TARGET}_resources" MACOSX_BUNDLE ${BUNDLE_RESOURCES})
+    # add_executable("${CURRENT_TARGET}_resources" MACOSX_BUNDLE ${BUNDLE_RESOURCES})
+    add_library("${CURRENT_TARGET}_resources" ${BUNDLE_RESOURCES})
     get_filename_component(base_path ${resources_dir} ABSOLUTE)
 
     foreach (resource_path ${BUNDLE_RESOURCES})
@@ -187,11 +192,14 @@ macro(add_resources resources_dir)
       message("resource ${resource_path}")
       message("resource ${relative_dir}")
       #set_source_files_properties(${BUNDLE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-
     endforeach ()
+
     #set_source_files_properties(${BUNDLE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-    #SET_TARGET_PROPERTIES("${CURRENT_TARGET}_resources" PROPERTIES LINKER_LANGUAGE C)
+    set_target_properties("${CURRENT_TARGET}_resources" PROPERTIES LINKER_LANGUAGE C)
+    set_target_properties("${CURRENT_TARGET}_resources" PROPERTIES BUNDLE_EXTENSION "bundle")
+    set_xcode_property(${CURRENT_TARGET}_resources IPHONEOS_DEPLOYMENT_TARGET "8.4")
     set(ALL_RESOURCES "${ALL_RESOURCES} BUNDLE_RESOURCES" PARENT_SCOPE)
+
   else ()
     #MESSAGE(WARNING "${CMAKE_CURRENT_LIST_DIR}/${resource_dir} $<TARGET_FILE_DIR:${CURRENT_TARGET}>/${resources_dir}")
 
