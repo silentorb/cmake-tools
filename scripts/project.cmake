@@ -180,7 +180,7 @@ endmacro(add)
 macro(add_resources resources_dir)
 
   file(GLOB_RECURSE BUNDLE_RESOURCES ${resources_dir}/*)
-  if (IOS)
+  if (IOS_NOT_USING_ANYMORE)
     # add_executable("${CURRENT_TARGET}_resources" MACOSX_BUNDLE ${BUNDLE_RESOURCES})
     add_library("${CURRENT_TARGET}_resources" ${BUNDLE_RESOURCES})
     get_filename_component(base_path ${resources_dir} ABSOLUTE)
@@ -216,12 +216,20 @@ macro(add_resources resources_dir)
 #      message("${BUNDLE_RESOURCES}")
     set_source_files_properties(${FIRST_SOURCE} PROPERTIES OBJECT_DEPENDS "${BUNDLE_RESOURCES}")
 
+if (IOS)
+  add_custom_command(TARGET ${CURRENT_TARGET}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} ${CMAKE_BINARY_DIR}/${resources_dir}
+    COMMENT "Copying ${CURRENT_TARGET} files"
+    )
+
+else()
     add_custom_command(TARGET ${CURRENT_TARGET}
       COMMAND ${CMAKE_COMMAND} -E copy_directory
       ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} $<TARGET_FILE_DIR:${CURRENT_TARGET}>/${resources_dir}
       COMMENT "Copying ${CURRENT_TARGET} files"
       )
-
+endif()
     #    get_property(output_dir TARGET ${CURRENT_TARGET} PROPERTY LOCATION)
     #message("$<TARGET_FILE_DIR:${CURRENT_TARGET}>/$")
     #      print_info()
