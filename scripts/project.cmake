@@ -17,9 +17,9 @@ macro(create_library target)
     #    message("No sources for ${target}")
     if (IOS)
       file(GLOB_RECURSE CURRENT_SOURCES source/*.cpp source/*.mm source/*.m source/*.c)
-    else()
+    else ()
       file(GLOB_RECURSE CURRENT_SOURCES source/*.cpp source/*.c)
-    endif()
+    endif ()
 
     file(GLOB_RECURSE HEADERS source/*.h)
     set(CURRENT_SOURCES ${CURRENT_SOURCES} PARENT_SCOPE)
@@ -211,25 +211,25 @@ macro(add_resources resources_dir)
 
     #    add_dependencies(${CURRENT_TARGET} ${CURRENT_TARGET}_resources)
     list(GET CURRENT_SOURCES 0 FIRST_SOURCE)
-#    message("${CURRENT_SOURCES}")
-#    message("first: ${FIRST_SOURCE}")
-#      message("${BUNDLE_RESOURCES}")
+    #    message("${CURRENT_SOURCES}")
+    #    message("first: ${FIRST_SOURCE}")
+    #      message("${BUNDLE_RESOURCES}")
     set_source_files_properties(${FIRST_SOURCE} PROPERTIES OBJECT_DEPENDS "${BUNDLE_RESOURCES}")
 
-if (IOS)
-  add_custom_command(TARGET ${CURRENT_TARGET}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} ${CMAKE_BINARY_DIR}/${resources_dir}
-    COMMENT "Copying ${CURRENT_TARGET} files"
-    )
+    if (IOS)
+      add_custom_command(TARGET ${CURRENT_TARGET}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} ${CMAKE_BINARY_DIR}/${resources_dir}
+        COMMENT "Copying ${CURRENT_TARGET} files"
+        )
 
-else()
-    add_custom_command(TARGET ${CURRENT_TARGET}
-      COMMAND ${CMAKE_COMMAND} -E copy_directory
-      ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} $<TARGET_FILE_DIR:${CURRENT_TARGET}>/${resources_dir}
-      COMMENT "Copying ${CURRENT_TARGET} files"
-      )
-endif()
+    else ()
+      add_custom_command(TARGET ${CURRENT_TARGET}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} $<TARGET_FILE_DIR:${CURRENT_TARGET}>/${resources_dir}
+        COMMENT "Copying ${CURRENT_TARGET} files"
+        )
+    endif ()
     #    get_property(output_dir TARGET ${CURRENT_TARGET} PROPERTY LOCATION)
     #message("$<TARGET_FILE_DIR:${CURRENT_TARGET}>/$")
     #      print_info()
@@ -264,27 +264,7 @@ function(set_lib_prefix varname)
   endif ()
 endfunction()
 
-function(doctor_libname varname is_dynamic path)
-  #  set(path "${ARGV2}")
-  set(name ${${varname}})
-
-  if (is_dynamic)
-    if (MSVC OR MINGW)
-      set(extension "dll")
-    else ()
-      set(extension "a")
-    endif ()
-  else ()
-    if (MSVC)
-      set(extension "lib")
-    elseif (IOS)
-      set(extension "a")
-    else ()
-      set(extension "dll.a")
-    endif ()
-
-  endif ()
-  #  message("${path} ${name} ${extension}")
+macro(doctor varname path name extension)
   if (path AND EXISTS ${path}/${name}.${extension})
   else ()
     string(SUBSTRING "${name}" 0 3 libprefix)
@@ -299,32 +279,66 @@ function(doctor_libname varname is_dynamic path)
     endif ()
   endif ()
 
-  set(${varname} "${name}.${extension}" PARENT_SCOPE)
+#    message("1 ${name}")
+  set(name2 name)
+  set(extension2 extension)
+  set(${varname} "${${name2}}.${${extension2}}" PARENT_SCOPE)
+#  message("2 ${name}")
+endmacro()
 
+function(doctor_dynamic varname path)
+  set(name ${${varname}})
+
+  if (MSVC OR MINGW)
+    set(extension "dll")
+  else ()
+    set(extension "a")
+  endif ()
+
+  doctor(${varname} ${path} ${name} ${extension})
+
+endfunction()
+
+function(doctor_static varname path is_dynamic)
+  set(name ${${varname}})
+
+  if (MSVC)
+    set(extension "lib")
+  elseif (MINGW AND is_dynamic)
+    set(extension "dll.a")
+  else ()
+    set(extension "a")
+  endif ()
+
+    message("a ${${varname}} ${name} ${extension}")
+  message("0 ${name}")
+  doctor(${varname} ${path} ${name} ${extension})
+  message("3 ${name}")
+
+  message("b ${${varname}} - ${name} - ${extension}")
 endfunction()
 
 macro(link_external_static path)
   set(libname "${ARGV1}")
+  set(is_dynamic "${ARGV2}")
+  if (NOT is_dynamic)
+    set(is_dynamic FALSE)
+  endif ()
+
   if (NOT libname)
     set(libname ${path})
   endif ()
 
   set(fullpath ${MYTHIC_DEPENDENCIES}/${path}/lib)
 
-  doctor_libname(libname FALSE ${fullpath})
-  #  if (MINGW)
-  #    set(libname "${libname}.dll.a")
-  #    set_lib_prefix(libname)
-  #  elseif (MSVC)
-  #    set(libname "${libname}.lib")
-  #  endif ()
+  doctor_static(libname ${fullpath} ${is_dynamic})
 
-message ("${CURRENT_TARGET} ${fullpath}/${libname}")
-if (IOS)
-  target_link_libraries(${CURRENT_TARGET} "-l${fullpath}/${libname}")
-else()
-  target_link_libraries(${CURRENT_TARGET} "${fullpath}/${libname}")
-endif()
+  message("${CURRENT_TARGET} ${fullpath}/${libname}")
+  if (IOS)
+    target_link_libraries(${CURRENT_TARGET} "-l${fullpath}/${libname}")
+  else ()
+    target_link_libraries(${CURRENT_TARGET} "${fullpath}/${libname}")
+  endif ()
 
 endmacro()
 
@@ -339,10 +353,10 @@ macro(link_external path)
     set(dllname ${libname})
   endif ()
 
-  link_external_static(${path} ${libname})
+  link_external_static(${path} ${libname} TRUE)
 
   set(fullpath "${MYTHIC_DEPENDENCIES}/${path}/bin")
-  doctor_libname(dllname TRUE ${fullpath})
+  doctor_dynamic(dllname ${fullpath})
 
   add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${fullpath}/${dllname} $<TARGET_FILE_DIR:${CURRENT_TARGET}>

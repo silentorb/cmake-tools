@@ -19,5 +19,3 @@ public:
     no_copy& operator=(no_copy const&) = delete;
     no_copy() {}
 };
-
-const char * get_resource_path();
