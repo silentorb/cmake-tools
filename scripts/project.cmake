@@ -353,12 +353,16 @@ macro(link_external path)
     set(dllname ${libname})
   endif ()
 
-  link_external_static(${path} ${libname} TRUE)
+  if (IOS)
+    link_external_static(${path} ${libname})
+  else()
+    link_external_static(${path} ${libname} TRUE)
 
-  set(fullpath "${MYTHIC_DEPENDENCIES}/${path}/bin")
-  doctor_dynamic(dllname ${fullpath})
+    set(fullpath "${MYTHIC_DEPENDENCIES}/${path}/bin")
+    doctor_dynamic(dllname ${fullpath})
 
-  add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${fullpath}/${dllname} $<TARGET_FILE_DIR:${CURRENT_TARGET}>
-    )
+    add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${fullpath}/${dllname} $<TARGET_FILE_DIR:${CURRENT_TARGET}>
+      )
+  endif()
 endmacro()
