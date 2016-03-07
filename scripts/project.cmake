@@ -189,8 +189,8 @@ macro(add_resources resources_dir)
       #message("hello ${base_path}, ${resource_path}")
       get_filename_component(resource_dir ${resource_path} DIRECTORY)
       get_relative_path(relative_dir ${base_path} ${resource_dir})
-      message("resource ${resource_path}")
-      message("resource ${relative_dir}")
+      #      message("resource ${resource_path}")
+      #      message("resource ${relative_dir}")
       #set_source_files_properties(${BUNDLE_RESOURCES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     endforeach ()
 
@@ -279,11 +279,11 @@ macro(doctor varname path name extension)
     endif ()
   endif ()
 
-#    message("1 ${name}")
+  #    message("1 ${name}")
   set(name2 name)
   set(extension2 extension)
   set(${varname} "${${name2}}.${${extension2}}" PARENT_SCOPE)
-#  message("2 ${name}")
+  #  message("2 ${name}")
 endmacro()
 
 function(doctor_dynamic varname path)
@@ -310,12 +310,8 @@ function(doctor_static varname path is_dynamic)
     set(extension "a")
   endif ()
 
-    message("a ${${varname}} ${name} ${extension}")
-  message("0 ${name}")
   doctor(${varname} ${path} ${name} ${extension})
-  message("3 ${name}")
 
-  message("b ${${varname}} - ${name} - ${extension}")
 endfunction()
 
 macro(link_external_static path)
@@ -333,7 +329,7 @@ macro(link_external_static path)
 
   doctor_static(libname ${fullpath} ${is_dynamic})
 
-  message("${CURRENT_TARGET} ${fullpath}/${libname}")
+#  message("${CURRENT_TARGET} ${fullpath}/${libname}")
   if (IOS)
     target_link_libraries(${CURRENT_TARGET} "-l${fullpath}/${libname}")
   else ()
@@ -355,7 +351,7 @@ macro(link_external path)
 
   if (IOS)
     link_external_static(${path} ${libname})
-  else()
+  else ()
     link_external_static(${path} ${libname} TRUE)
 
     set(fullpath "${MYTHIC_DEPENDENCIES}/${path}/bin")
@@ -364,5 +360,5 @@ macro(link_external path)
     add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${fullpath}/${dllname} $<TARGET_FILE_DIR:${CURRENT_TARGET}>
       )
-  endif()
+  endif ()
 endmacro()
