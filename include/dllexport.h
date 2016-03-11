@@ -5,6 +5,7 @@
 
 #if defined (_MSC_VER)
 #if defined(EXPORTING_DLL)
+#define MANUAL_SYMBOL_EXPORTING
 #define MYTHIC_EXPORT __declspec(dllexport)
 #else
 #define MYTHIC_EXPORT __declspec(dllimport)
