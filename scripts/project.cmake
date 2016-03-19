@@ -6,6 +6,8 @@ else ()
 endif ()
 
 macro(create_library target)
+set (CMAKE_OSX_ARCHITECTURES "armv7 arm64")
+
   set(CURRENT_TARGET ${target})
   #message(WARNING "*${PROJECT_NAME} STREQUAL ${target}*")
   if (NOT "${PROJECT_NAME}" STREQUAL ${target})
