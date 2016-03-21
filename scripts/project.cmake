@@ -51,6 +51,11 @@ set (CMAKE_OSX_ARCHITECTURES "armv7 arm64")
 
   if (IOS)
     set_xcode_property(${target} IPHONEOS_DEPLOYMENT_TARGET "8.4")
+    #set_xcode_property(${target} ARCHS "armv7 arm64")
+    set_xcode_property(${target} VALID_ARCHS "armv7 armv7s arm64")
+    set_xcode_property(${target} SUPPORTED_PLATFORMS "iphonesimulator iphoneos")
+    set_xcode_property(${target} ONLY_ACTIVE_ARCH "NO")
+
   else ()
     set_target_properties(${target} PROPERTIES DEFINE_SYMBOL "EXPORTING_DLL")
   endif (IOS)
