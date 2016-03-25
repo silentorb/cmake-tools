@@ -6,7 +6,10 @@ else ()
 endif ()
 
 macro(create_library target)
-set (CMAKE_OSX_ARCHITECTURES "armv7 arm64")
+  set (CMAKE_OSX_ARCHITECTURES "armv7 arm64")
+
+  # Optimize debug build to help diagnose release build crashes.
+  #set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Os")
 
   set(CURRENT_TARGET ${target})
   #message(WARNING "*${PROJECT_NAME} STREQUAL ${target}*")
