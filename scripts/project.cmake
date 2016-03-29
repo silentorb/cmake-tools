@@ -346,6 +346,8 @@ macro(link_external_static path)
     target_link_libraries(${CURRENT_TARGET} "${fullpath}/${libname}")
   endif ()
 
+  include_directories(${MYTHIC_DEPENDENCIES}/${path}/include)
+
 endmacro()
 
 macro(link_external path)
@@ -370,5 +372,6 @@ macro(link_external path)
     add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${fullpath}/${dllname} $<TARGET_FILE_DIR:${CURRENT_TARGET}>
       )
+
   endif ()
 endmacro()
