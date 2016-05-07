@@ -1,3 +1,5 @@
+set(DOLLAR_SIGN "$")
+
 if (${IOS})
   add_definitions(-DIOS=1)
   set(BUILD_SHARED_LIBS OFF)
@@ -6,16 +8,16 @@ else ()
 endif ()
 
 macro(create_library target)
-  set (CMAKE_OSX_ARCHITECTURES "armv7 arm64")
+  set(CMAKE_OSX_ARCHITECTURES "armv7 arm64")
 
   # Optimize debug build to help diagnose release build crashes.
-    if (GCC_DEBUG_OPTIMIZATION_LEVEL)
-      set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -${GCC_DEBUG_OPTIMIZATION_LEVEL}")
-    endif()
+  if (GCC_DEBUG_OPTIMIZATION_LEVEL)
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -${GCC_DEBUG_OPTIMIZATION_LEVEL}")
+  endif ()
 
   if (MSVC_DEBUG_FLAGS)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${MSVC_DEBUG_FLAGS}")
-  endif()
+  endif ()
 
   set(CURRENT_TARGET ${target})
   #message(WARNING "*${PROJECT_NAME} STREQUAL ${target}*")
@@ -341,18 +343,26 @@ macro(link_external_static path)
     set(libname ${path})
   endif ()
 
-  set(fullpath ${MYTHIC_DEPENDENCIES}/${path}/lib)
-
-  doctor_static(libname ${fullpath} ${is_dynamic})
-
-#  message("${CURRENT_TARGET} ${fullpath}/${libname}")
-  if (IOS)
-    target_link_libraries(${CURRENT_TARGET} "-l${fullpath}/${libname}")
+  if (MSVC)
+    foreach (build_mode Release Debug)
+      set(fullpath ${MYTHIC_DEPENDENCIES}/${build_mode}/${path}//lib)
+      doctor_static(libname ${fullpath} ${is_dynamic})
+      target_link_libraries(${CURRENT_TARGET} "${fullpath}/${libname}")
+      include_directories(${MYTHIC_DEPENDENCIES}/${build_mode}/${path}/include)
+    endforeach ()
   else ()
-    target_link_libraries(${CURRENT_TARGET} "${fullpath}/${libname}")
-  endif ()
+    set(fullpath ${MYTHIC_DEPENDENCIES}/${path}//lib)
+    doctor_static(libname ${fullpath} ${is_dynamic})
 
-  include_directories(${MYTHIC_DEPENDENCIES}/${path}/include)
+    #  message("${CURRENT_TARGET} ${fullpath}/${libname}")
+    if (IOS)
+      target_link_libraries(${CURRENT_TARGET} "-l${fullpath}/${libname}")
+    else ()
+      target_link_libraries(${CURRENT_TARGET} "${fullpath}/${libname}")
+    endif ()
+
+    include_directories(${MYTHIC_DEPENDENCIES}/${path}/include)
+  endif ()
 
 endmacro()
 
