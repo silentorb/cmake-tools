@@ -7,7 +7,7 @@ else ()
   set(BUILD_SHARED_LIBS true)
 endif ()
 
-macro(create_library target)
+macro(create_target target is_executable)
   set(CMAKE_OSX_ARCHITECTURES "armv7 arm64")
 
   # Optimize debug build to help diagnose release build crashes.
@@ -20,9 +20,7 @@ macro(create_library target)
   endif ()
 
   set(CURRENT_TARGET ${target})
-  #message(WARNING "*${PROJECT_NAME} STREQUAL ${target}*")
   if (NOT "${PROJECT_NAME}" STREQUAL ${target})
-    #    message(WARNING "No project for ${target}")
     add_project(${target})
   endif ()
 
@@ -36,16 +34,17 @@ macro(create_library target)
 
     file(GLOB_RECURSE HEADERS source/*.h)
     set(CURRENT_SOURCES ${CURRENT_SOURCES} PARENT_SCOPE)
-    add_library(${target} ${CURRENT_SOURCES} ${HEADERS})
+    #    add_library(${target} ${CURRENT_SOURCES} ${HEADERS})
+    set(SOURCES ${CURRENT_SOURCES} ${HEADERS})
   else ()
-    add_library(${target} ${ARGN})
+    set(SOURCES ${ARGN})
   endif ()
 
-  #  if (NOT ANDROID)
-  #    set("TARGET_FILE_DIR_${target}" $<TARGET_FILE_DIR:${target}>)
-  ##    set("TARGET_LINKER_FILE_${target}" $<TARGET_LINKER_FILE:${target}>)
-  #    set("TARGET_FILE_${target}" $<TARGET_FILE:${target}>)
-  #  endif ()
+  if (${is_executable})
+    add_executable(${target} ${SOURCES})
+  else ()
+    add_library(${target} ${SOURCES})
+  endif ()
 
   if (NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     string(LENGTH "${CMAKE_SOURCE_DIR}" string_length)
@@ -55,14 +54,12 @@ macro(create_library target)
     if (NOT ANDROID)
       set_target_properties(${target} PROPERTIES FOLDER ${current_path})
     endif ()
-    #      message( "${current_path} ${temp}")
   endif ()
 
   include_directories(${CMAKE_TOOLS}/include) # for dllexport
 
   if (IOS)
     set_xcode_property(${target} IPHONEOS_DEPLOYMENT_TARGET "8.4")
-    #set_xcode_property(${target} ARCHS "armv7 arm64")
     set_xcode_property(${target} VALID_ARCHS "armv7 armv7s arm64")
     set_xcode_property(${target} SUPPORTED_PLATFORMS "iphonesimulator iphoneos")
     set_xcode_property(${target} ONLY_ACTIVE_ARCH "NO")
@@ -71,7 +68,15 @@ macro(create_library target)
     set_target_properties(${target} PROPERTIES DEFINE_SYMBOL "EXPORTING_DLL")
   endif (IOS)
 
+endmacro(create_target)
+
+macro(create_library target)
+  create_target(${target} FALSE)
 endmacro(create_library)
+
+macro(create_executable target)
+  create_target(${target} TRUE)
+endmacro(create_executable)
 
 macro(get_relative_path result root_path path)
   string(LENGTH "${root_path}" string_length)
