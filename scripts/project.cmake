@@ -24,6 +24,10 @@ macro(create_target target is_executable)
     add_project(${target})
   endif ()
 
+  if (MINGW)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreturn-type")
+  endif ()
+
   if ("${ARGN}" STREQUAL "")
     #    message("No sources for ${target}")
     if (IOS)
