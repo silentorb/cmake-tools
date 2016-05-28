@@ -28,3 +28,8 @@ class no_copy_minimal {
 public:
     no_copy_minimal &operator=(no_copy const &) = delete;
 };
+
+inline void Assert(bool expression) {
+  if (!expression)
+    throw "";
+}
