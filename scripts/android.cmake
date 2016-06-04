@@ -1,4 +1,5 @@
 unset(MSVC)
+message ("Generating for Android")
 
 macro(add_library target)
   #  add_custom_target(${target})
