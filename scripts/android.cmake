@@ -1,5 +1,6 @@
 unset(MSVC)
-message ("Generating for Android")
+unset(MINGW)
+message("Generating for Android")
 
 macro(add_library target)
   #  add_custom_target(${target})
@@ -11,7 +12,7 @@ macro(project target)
   set(PROJECT_NAME ${target} PARENT_SCOPE)
 endmacro()
 
-macro(add_executable target)
+macro(android_create_entrypoint target)
   #  add_custom_target(${target})
   #  set(${target}_sources ${ARGN} PARENT_SCOPE)
   create_library(${target} ${ARGN})
@@ -82,14 +83,22 @@ macro(create_test target)
 
 endmacro(create_test)
 
+macro(android_add_library library_name)
+  set(${CURRENT_TARGET}_libraries ${${CURRENT_TARGET}_libraries} ${library_name})
+  set(${CURRENT_TARGET}_libraries ${${CURRENT_TARGET}_libraries} PARENT_SCOPE)
+endmacro()
+
 macro(require)
   foreach (library_name ${ARGN})
-    #    message("${PROJECT_NAME} require ${library_name}")
     find_package(${library_name} REQUIRED)
 
-    set(${CURRENT_TARGET}_libraries ${${CURRENT_TARGET}_libraries} ${library_name})
-    set(${CURRENT_TARGET}_libraries ${${CURRENT_TARGET}_libraries} PARENT_SCOPE)
-    add_system_libraries(${${library_name}_system_libraries})
+    if (${library_name} IN_LIST all_libraries)
+      android_add_library(${library_name})
+      #    set(${CURRENT_TARGET}_libraries ${${CURRENT_TARGET}_libraries} ${library_name})
+      #    set(${CURRENT_TARGET}_libraries ${${CURRENT_TARGET}_libraries} PARENT_SCOPE)
+      add_system_libraries(${${library_name}_system_libraries})
+    endif ()
+
   endforeach ()
 endmacro()
 
@@ -118,3 +127,87 @@ macro(finish_mythic)
   include(${CMAKE_TOOLS}/generators/android/android-generator.cmake)
   message(FATAL_ERROR "This is not a real error, but the only way to prevent CMake from generating unneeded files.")
 endmacro(finish_mythic)
+
+
+macro(doctor varname path name extension)
+  if (path AND EXISTS ${path}/${name}.${extension})
+  else ()
+    string(SUBSTRING "${name}" 0 3 libprefix)
+    if (NOT libprefix STREQUAL "lib")
+      set(name "lib${name}")
+    endif ()
+  endif ()
+
+  set(name2 name)
+  set(extension2 extension)
+  set(${varname} "${${name2}}.${${extension2}}" PARENT_SCOPE)
+endmacro()
+
+function(doctor_dynamic varname path)
+  set(name ${${varname}})
+  set(extension "a")
+
+  doctor(${varname} ${path} ${name} ${extension})
+
+endfunction()
+
+function(doctor_static varname path is_dynamic)
+  set(name ${${varname}})
+  set(extension "a")
+  doctor(${varname} ${path} ${name} ${extension})
+
+endfunction()
+
+macro(include_external_directory path)
+  set(include_suffix "${ARGV1}")
+  if (NOT include_suffix)
+    set(include_suffix "")
+  else ()
+    set(include_suffix "/${include_suffix}")
+  endif ()
+
+  include_directories(${MYTHIC_DEPENDENCIES}/${path}/include${include_suffix})
+
+endmacro()
+
+macro(link_external_static path)
+  set(libname "${ARGV1}")
+  set(is_dynamic "${ARGV2}")
+  if (NOT is_dynamic)
+    set(is_dynamic FALSE)
+  endif ()
+
+  if (NOT libname)
+    set(libname ${path})
+  endif ()
+
+  set(include_suffix "${ARGV3}")
+  if (NOT include_suffix)
+    set(include_suffix "")
+  else ()
+    set(include_suffix "/${include_suffix}")
+  endif ()
+
+  set(fullpath ${MYTHIC_DEPENDENCIES}/${path}/lib)
+  doctor_static(libname ${fullpath} ${is_dynamic})
+
+  #  target_link_libraries(${CURRENT_TARGET} "${fullpath}/${libname}")
+  android_add_library("${fullpath}/${libname}")
+
+  include_directories(${MYTHIC_DEPENDENCIES}/${path}/include${include_suffix})
+
+endmacro()
+
+macro(link_external path)
+  set(libname "${ARGV1}")
+  if (NOT libname)
+    set(libname ${path})
+  endif ()
+
+  set(dllname "${ARGV2}")
+  if (NOT dllname)
+    set(dllname ${libname})
+  endif ()
+
+  link_external_static(${path} ${libname})
+endmacro()
