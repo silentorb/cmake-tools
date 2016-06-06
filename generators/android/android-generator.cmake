@@ -58,7 +58,7 @@ foreach (target ${all_libraries})
     ${CMAKE_BINARY_DIR}/jni/${target_relative_path}/Android.mk
   )
 
-  set(android_includes "${android_includes}\ninclude jni/${target_relative_path}/Android.mk")
+  set(android_includes "${android_includes}\ninclude ${JNI_PATH}${target_relative_path}/Android.mk")
 
   #    message("${target} ${${target}_resources_dir}")
   if (NOT "${${target}_resources_dir}" STREQUAL "")
