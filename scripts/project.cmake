@@ -1,11 +1,14 @@
 set(DOLLAR_SIGN "$")
 
-if (${IOS})
-  add_definitions(-DIOS=1)
+if (IOS OR ANDROID)
   set(BUILD_SHARED_LIBS OFF)
 else ()
   set(BUILD_SHARED_LIBS true)
 endif ()
+
+if (IOS)
+  add_definitions(-DIOS=1)
+endif()
 
 macro(create_target target is_executable)
   set(CMAKE_OSX_ARCHITECTURES "armv7 arm64")
@@ -120,7 +123,7 @@ macro(require)
       target_link_libraries(${CURRENT_TARGET}
         $<TARGET_FILE:${library_name}>
         )
-    elseif (NOT ANDROID)
+    else()
       target_link_libraries(${CURRENT_TARGET}
         $<TARGET_LINKER_FILE:${library_name}>
         )
@@ -168,7 +171,7 @@ if (IOS)
 else ()
 
   macro(add_project project_name)
-    if (${MINGW})
+    if (MINGW OR ANDROID)
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
     endif ()
 
@@ -180,7 +183,7 @@ else ()
       set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR} PARENT_SCOPE)
     endif ()
 
-    include(${project_name}-config.cmake)
+    include(${project_name}-config.cmake OPTIONAL)
 
   endmacro(add_project)
 
@@ -415,7 +418,7 @@ macro(link_external path)
     set(dllname ${libname})
   endif ()
 
-  if (IOS)
+  if (IOS OR ANDROID)
     link_external_static(${path} ${libname})
   else ()
     link_external_static(${path} ${libname} TRUE)
@@ -435,3 +438,12 @@ macro(link_external path)
 
   endif ()
 endmacro()
+#if (ANRDOID_NDK)
+  macro(add_system_libraries)
+#    if (NOT "${ARGN}" STREQUAL "")
+      set(${CURRENT_TARGET}_system_libraries ${${CURRENT_TARGET}_system_libraries} ${ARGN})
+      list(REMOVE_DUPLICATES ${CURRENT_TARGET}_system_libraries)
+      set(${CURRENT_TARGET}_system_libraries ${${CURRENT_TARGET}_system_libraries} PARENT_SCOPE)
+#    endif ()
+  endmacro()
+#endif ()
