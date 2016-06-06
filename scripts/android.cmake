@@ -6,12 +6,12 @@ cmake_policy(SET CMP0057 NEW)
 
 macro(append_target_property property_name value)
   set(${CURRENT_TARGET}_${property_name} ${${CURRENT_TARGET}_${property_name}} ${value})
-  set(${CURRENT_TARGET}_${property_name} ${${CURRENT_TARGET}_${property_name}} ${value} PARENT_SCOPE)
+  set(${CURRENT_TARGET}_${property_name} ${${CURRENT_TARGET}_${property_name}} PARENT_SCOPE)
 endmacro()
 
 macro(set_target_property property_name value)
   set(${CURRENT_TARGET}_${property_name} ${value})
-  set(${CURRENT_TARGET}_${property_name} ${value} PARENT_SCOPE)
+  set(${CURRENT_TARGET}_${property_name} ${${CURRENT_TARGET}_${property_name}} PARENT_SCOPE)
 endmacro()
 
 macro(add_library target)
@@ -96,19 +96,17 @@ endmacro()
 macro(create_library target)
   set(all_libraries ${all_libraries} ${target} PARENT_SCOPE)
   set(CURRENT_TARGET ${target})
-  #message(WARNING "*${PROJECT_NAME} STREQUAL ${target}*")
   if (NOT "${PROJECT_NAME}" STREQUAL ${target})
-#    message("${target} ${ARGV}")
     android_add_project(${target})
   endif ()
 
-  #    message(${ARGN})
   if (NOT "${ARGN}" STREQUAL "")
     set_target_property(sources "${ARGN}")
   else ()
     file(GLOB_RECURSE SOURCES source/*.cpp source/*.c)
-    #  add_library(${target} ${SOURCES})
-    set_target_property(sources ${SOURCES})
+    if (SOURCES)
+      append_target_property(sources ${SOURCES})
+    endif ()
   endif ()
 
   string(LENGTH "${CMAKE_SOURCE_DIR}" string_length)
@@ -207,30 +205,31 @@ macro(include_external_directory path)
 endmacro()
 
 macro(link_external_static path)
-  set(libname "${ARGV1}")
-  set(is_dynamic "${ARGV2}")
-  if (NOT is_dynamic)
-    set(is_dynamic FALSE)
-  endif ()
-
-  if (NOT libname)
-    set(libname ${path})
-  endif ()
-
-  set(include_suffix "${ARGV3}")
-  if (NOT include_suffix)
-    set(include_suffix "")
-  else ()
-    set(include_suffix "/${include_suffix}")
-  endif ()
-
-  set(fullpath ${MYTHIC_DEPENDENCIES}/${path}/lib)
-  doctor_static(libname ${fullpath} ${is_dynamic})
-
-  #  target_link_libraries(${CURRENT_TARGET} "${fullpath}/${libname}")
-  android_add_library("${fullpath}/${libname}")
-
-  include_directories(${MYTHIC_DEPENDENCIES}/${path}/include${include_suffix})
+  android_add_library(${path})
+#  set(libname "${ARGV1}")
+#  set(is_dynamic "${ARGV2}")
+#  if (NOT is_dynamic)
+#    set(is_dynamic FALSE)
+#  endif ()
+#
+#  if (NOT libname)
+#    set(libname ${path})
+#  endif ()
+#
+#  set(include_suffix "${ARGV3}")
+#  if (NOT include_suffix)
+#    set(include_suffix "")
+#  else ()
+#    set(include_suffix "/${include_suffix}")
+#  endif ()
+#
+#  set(fullpath ${MYTHIC_DEPENDENCIES}/${path}/lib)
+#  doctor_static(libname ${fullpath} ${is_dynamic})
+#
+#  #  target_link_libraries(${CURRENT_TARGET} "${fullpath}/${libname}")
+#  android_add_library("${fullpath}/${libname}")
+#
+#  include_directories(${MYTHIC_DEPENDENCIES}/${path}/include${include_suffix})
 
 endmacro()
 

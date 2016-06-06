@@ -1,9 +1,9 @@
 
 #  message("a ${quartz_sources}")
 if (ANDROID_DEPENENCIES)
-  set(android_includes "")
+  set(android_includes "include ${ANDROID_DEPENENCIES}/Android.mk")
 else ()
-  set(android_includes "include jni/${ANDROID_DEPENENCIES}/Android.mk")
+  set(android_includes "")
 endif ()
 set(all_resources "")
 
@@ -45,7 +45,7 @@ foreach (target ${all_libraries})
   endforeach ()
 
   #  message("library ${target}  ${${target}_libraries}")
-    message("defines ${target}  ${${target}_defines}")
+  message("defines ${target}  ${${target}_defines}")
 
   if (${${target}_is_executable})
     set(template_name front)
