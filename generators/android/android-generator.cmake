@@ -41,6 +41,7 @@ foreach (target ${all_libraries})
   endforeach ()
 
   #  message("library ${target}  ${${target}_libraries}")
+    message("defines ${target}  ${${target}_defines}")
 
   if (${${target}_is_executable})
     set(template_name front)
