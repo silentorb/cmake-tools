@@ -7,6 +7,7 @@ LOCAL_SRC_FILES :=${target_sources}
 LOCAL_LDLIBS    := -llog -landroid${target_system_libraries}
 LOCAL_STATIC_LIBRARIES := ${target_libraries}
 LOCAL_C_INCLUDES :=${target_includes}
+LOCAL_CFLAGS := ${target_defines}
 
 include $(BUILD_SHARED_LIBRARY)
 
