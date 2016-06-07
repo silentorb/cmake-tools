@@ -78,7 +78,13 @@ endmacro()
 macro(include_directories)
   #  set(${CURRENT_TARGET}_includes ${${CURRENT_TARGET}_includes} ${ARGN})
   #  set(${CURRENT_TARGET}_includes ${${CURRENT_TARGET}_includes} ${ARGN} PARENT_SCOPE)
-  append_target_property(includes ${ARGN})
+  set(args "${ARGN}")
+  foreach (arg IN LISTS args)
+    if (NOT ${arg} STREQUAL "BEFORE" AND NOT ${arg} STREQUAL "AFTER")
+      append_target_property(includes ${arg})
+    endif ()
+  endforeach ()
+
 endmacro()
 
 macro(android_add_project project_name)
@@ -229,7 +235,7 @@ macro(link_external_static path)
   #  #  target_link_libraries(${CURRENT_TARGET} "${fullpath}/${libname}")
   #  android_add_library("${fullpath}/${libname}")
   #
-    include_directories(${MYTHIC_DEPENDENCIES}/${path}/include${include_suffix})
+  include_directories(${MYTHIC_DEPENDENCIES}/${path}/include${include_suffix})
 
 endmacro()
 
