@@ -18,11 +18,11 @@ macro(add_library target)
   #  set(${target}_sources ${ARGN})
   #  set(${target}_sources ${ARGN} PARENT_SCOPE)
   create_library(${target} ${ARGN})
-#  message("target ${target}")
+  #  message("target ${target}")
 endmacro()
 
 macro(project target)
-#  message("project ${target}")
+  #  message("project ${target}")
   set(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
   set(${target}_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -76,8 +76,9 @@ macro(add_system_libraries)
 endmacro()
 
 macro(include_directories)
-  set(${CURRENT_TARGET}_includes ${${CURRENT_TARGET}_includes} ${ARGN})
-  set(${CURRENT_TARGET}_includes ${${CURRENT_TARGET}_includes} ${ARGN} PARENT_SCOPE)
+  #  set(${CURRENT_TARGET}_includes ${${CURRENT_TARGET}_includes} ${ARGN})
+  #  set(${CURRENT_TARGET}_includes ${${CURRENT_TARGET}_includes} ${ARGN} PARENT_SCOPE)
+  append_target_property(includes ${ARGN})
 endmacro()
 
 macro(android_add_project project_name)
@@ -129,8 +130,9 @@ macro(create_test target)
 endmacro(create_test)
 
 macro(android_add_library library_name)
-  set(${CURRENT_TARGET}_libraries ${${CURRENT_TARGET}_libraries} ${library_name})
-  set(${CURRENT_TARGET}_libraries ${${CURRENT_TARGET}_libraries} PARENT_SCOPE)
+  #  set(${CURRENT_TARGET}_libraries ${${CURRENT_TARGET}_libraries} ${library_name})
+  #  set(${CURRENT_TARGET}_libraries ${${CURRENT_TARGET}_libraries} PARENT_SCOPE)
+  append_target_property(libraries ${library_name})
 endmacro()
 
 macro(require)
@@ -204,30 +206,30 @@ endmacro()
 
 macro(link_external_static path)
   android_add_library(${path})
-#  set(libname "${ARGV1}")
-#  set(is_dynamic "${ARGV2}")
-#  if (NOT is_dynamic)
-#    set(is_dynamic FALSE)
-#  endif ()
-#
-#  if (NOT libname)
-#    set(libname ${path})
-#  endif ()
-#
-#  set(include_suffix "${ARGV3}")
-#  if (NOT include_suffix)
-#    set(include_suffix "")
-#  else ()
-#    set(include_suffix "/${include_suffix}")
-#  endif ()
-#
-#  set(fullpath ${MYTHIC_DEPENDENCIES}/${path}/lib)
-#  doctor_static(libname ${fullpath} ${is_dynamic})
-#
-#  #  target_link_libraries(${CURRENT_TARGET} "${fullpath}/${libname}")
-#  android_add_library("${fullpath}/${libname}")
-#
-#  include_directories(${MYTHIC_DEPENDENCIES}/${path}/include${include_suffix})
+  #  set(libname "${ARGV1}")
+  #  set(is_dynamic "${ARGV2}")
+  #  if (NOT is_dynamic)
+  #    set(is_dynamic FALSE)
+  #  endif ()
+  #
+  #  if (NOT libname)
+  #    set(libname ${path})
+  #  endif ()
+  #
+  #  set(include_suffix "${ARGV3}")
+  #  if (NOT include_suffix)
+  #    set(include_suffix "")
+  #  else ()
+  #    set(include_suffix "/${include_suffix}")
+  #  endif ()
+  #
+  #  set(fullpath ${MYTHIC_DEPENDENCIES}/${path}/lib)
+  #  doctor_static(libname ${fullpath} ${is_dynamic})
+  #
+  #  #  target_link_libraries(${CURRENT_TARGET} "${fullpath}/${libname}")
+  #  android_add_library("${fullpath}/${libname}")
+  #
+    include_directories(${MYTHIC_DEPENDENCIES}/${path}/include${include_suffix})
 
 endmacro()
 
@@ -254,8 +256,10 @@ endmacro()
 macro(install)
 endmacro()
 
-macro(find_package)
-endmacro()
+if (BUILDING_DEPENDENCIES)
+  macro(find_package)
+  endmacro()
+endif ()
 
 macro(target_include_directories)
   #  set(args "${ARGN}")
