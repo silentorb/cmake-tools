@@ -121,19 +121,21 @@ macro(require)
     #    message("${PROJECT_NAME} require ${library_name}")
     find_package(${library_name} REQUIRED)
 
-    if (IOS OR ANDROID)
-      target_link_libraries(${CURRENT_TARGET}
-        $<TARGET_FILE:${library_name}>
-        )
-    else ()
-      target_link_libraries(${CURRENT_TARGET}
-        $<TARGET_LINKER_FILE:${library_name}>
+    if (TARGET ${library_name})
+      if (IOS)
+        target_link_libraries(${CURRENT_TARGET}
+          $<TARGET_FILE:${library_name}>
+          )
+      else ()
+        target_link_libraries(${CURRENT_TARGET}
+          $<TARGET_LINKER_FILE:${library_name}>
+          )
+      endif ()
+
+      add_dependencies(${CURRENT_TARGET}
+        ${library_name}
         )
     endif ()
-
-    add_dependencies(${CURRENT_TARGET}
-      ${library_name}
-      )
   endforeach ()
 endmacro()
 
