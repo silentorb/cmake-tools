@@ -34,9 +34,9 @@ foreach (target ${all_libraries})
 
   foreach (inc ${${target}_sources})
     get_filename_component(extension ${inc} EXT)
-      message("${inc}  ---  ${extension}")
+#      message("${inc}  ---  ${extension}")
     if ("${extension}" STREQUAL ".c" OR "${extension}" STREQUAL ".cpp")
-      set(target_sources "$target_sources} ${inc}")
+      set(target_sources "${target_sources} ${inc}")
     endif ()
   endforeach ()
 
