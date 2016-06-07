@@ -34,7 +34,8 @@ foreach (target ${all_libraries})
 
   foreach (inc ${${target}_sources})
     get_filename_component(extension ${inc} EXT)
-    if ("${extension}" STREQUAL "c" OR "${extension}" STREQUAL "cpp")
+      message("${inc}  ---  ${extension}")
+    if ("${extension}" STREQUAL ".c" OR "${extension}" STREQUAL ".cpp")
       set(target_sources "$target_sources} ${inc}")
     endif ()
   endforeach ()
@@ -55,7 +56,7 @@ foreach (target ${all_libraries})
   endforeach ()
 
   #  message("library ${target}  ${${target}_libraries}")
-  message("defines ${target}  ${${target}_defines}")
+#  message("defines ${target}  ${${target}_defines}")
 
   if (${${target}_is_executable})
     set(template_name front)
