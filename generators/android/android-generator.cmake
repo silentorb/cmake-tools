@@ -3,7 +3,7 @@
 set(android_includes "${ANDROID_MK_HEADER}")
 if (ANDROID_DEPENENCIES)
   set(android_includes "${android_includes}include ${ANDROID_DEPENENCIES}/Android.mk")
-endif()
+endif ()
 
 set(all_resources "")
 
@@ -29,7 +29,17 @@ endforeach ()
 
 foreach (target ${all_libraries})
   list(REMOVE_DUPLICATES ${target}_includes)
-  list_to_string(target_sources "${${target}_sources}")
+
+  set(target_sources "")
+
+  foreach (inc ${${target}_sources})
+    get_filename_component(extension ${inc} EXT)
+    if ("${extension}" STREQUAL "c" OR "${extension}" STREQUAL "cpp")
+      set(target_sources "$target_sources} ${inc}")
+    endif ()
+  endforeach ()
+
+#  list_to_string(target_sources "${${target}_sources}")
   list_to_string(target_includes "${${target}_includes}")
 
   set(target_containing_path ${${target}_containing_path})
