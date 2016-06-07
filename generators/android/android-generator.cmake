@@ -26,8 +26,9 @@ foreach (target ${all_libraries})
     endif ()
   endforeach ()
 endforeach ()
-
+message("Libraries: ${all_libraries}")
 foreach (target ${all_libraries})
+
   list(REMOVE_DUPLICATES ${target}_includes)
 
   set(target_sources "")
