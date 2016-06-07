@@ -1,1 +1,1 @@
-ndk-gdb-py --nowait --start --verbose --force
+ndk-gdb-py --nowait --verbose --force --launch android.app.NativeActivity

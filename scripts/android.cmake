@@ -217,6 +217,11 @@ macro(include_external_directory path)
 endmacro()
 
 macro(link_external_static path)
+  set(libname "${ARGV1}")
+  if (NOT libname)
+    set(libname ${path})
+  endif ()
+
   android_add_library(${path})
   include_directories(${MYTHIC_DEPENDENCIES}/${path}/include${include_suffix})
 endmacro()
