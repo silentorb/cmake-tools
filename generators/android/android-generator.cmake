@@ -42,6 +42,7 @@ foreach (target ${all_libraries})
 
 #  list_to_string(target_sources "${${target}_sources}")
   list_to_string(target_includes "${${target}_includes}")
+  list_to_string(target_defines "${${target}_defines}")
 
   set(target_containing_path ${${target}_containing_path})
   set(target_relative_path ${${target}_relative_path})
