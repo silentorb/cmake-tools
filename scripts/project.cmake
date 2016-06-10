@@ -89,6 +89,10 @@ macro(create_executable target)
   create_target(${target} TRUE)
 endmacro(create_executable)
 
+macro(create_header_library target)
+  set(${target}_DIR ${CMAKE_CURRENT_LIST_DIR}  CACHE INTERNAL "${target} path")
+endmacro(create_header_library)
+
 macro(get_relative_path result root_path path)
   string(LENGTH "${root_path}" string_length)
   math(EXPR string_length "${string_length} + 1")

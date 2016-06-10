@@ -101,7 +101,7 @@ configure_file(
 
 configure_file(
   ${CMAKE_CURRENT_LIST_DIR}/templates/debug.bat
-  ${CMAKE_BINARY_DIR}/debug.bat
+  ${CMAKE_BINARY_DIR}/debug.ps1
 )
 
 configure_file(
