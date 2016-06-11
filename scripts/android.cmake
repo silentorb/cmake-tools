@@ -80,8 +80,6 @@ macro(add_system_libraries)
 endmacro()
 
 macro(include_directories)
-  #  set(${CURRENT_TARGET}_includes ${${CURRENT_TARGET}_includes} ${ARGN})
-  #  set(${CURRENT_TARGET}_includes ${${CURRENT_TARGET}_includes} ${ARGN} PARENT_SCOPE)
   set(args "${ARGN}")
   foreach (arg IN LISTS args)
     if (NOT ${arg} STREQUAL "BEFORE" AND NOT ${arg} STREQUAL "AFTER")
