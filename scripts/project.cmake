@@ -110,7 +110,7 @@ endmacro(create_test)
 macro(require)
   if (LOCAL_TARGET)
     foreach (library_name ${ARGN})
-      #    message("${PROJECT_NAME} require ${library_name}")
+#          message(WARNING "${PROJECT_NAME} require ${library_name}")
       find_package(${library_name} REQUIRED)
 
       if (TARGET ${library_name})

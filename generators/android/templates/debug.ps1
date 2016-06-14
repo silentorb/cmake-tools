@@ -1,1 +1,1 @@
-ndk-gdb-py --nowait --verbose --force --launch android.app.NativeActivity --exec=debug-input.txt
+ndk-gdb-py --nowait --verbose --force --launch com.silentorb.mythic.MythicActivity --exec=debug-input.txt
