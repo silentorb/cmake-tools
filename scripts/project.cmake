@@ -67,7 +67,9 @@ macro(create_target target is_executable)
     endif ()
   endif ()
 
-  include_directories(${CMAKE_TOOLS}/include) # for dllexport
+  if (COMMAND on_create_target)
+    on_create_target()
+  endif ()
 
   if (IOS)
     set_xcode_property(${target} IPHONEOS_DEPLOYMENT_TARGET "8.4")
@@ -90,7 +92,7 @@ macro(create_executable target)
 endmacro(create_executable)
 
 macro(create_header_library target)
-  set(${target}_DIR ${CMAKE_CURRENT_LIST_DIR}  CACHE INTERNAL "${target} path")
+  set(${target}_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "${target} path")
 endmacro(create_header_library)
 
 macro(get_relative_path result root_path path)
@@ -110,7 +112,7 @@ endmacro(create_test)
 macro(require)
   if (LOCAL_TARGET)
     foreach (library_name ${ARGN})
-#          message(WARNING "${PROJECT_NAME} require ${library_name}")
+      #          message(WARNING "${PROJECT_NAME} require ${library_name}")
       find_package(${library_name} REQUIRED)
 
       if (TARGET ${library_name})
