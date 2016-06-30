@@ -18,7 +18,7 @@ macro(create_target target is_executable)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -${GCC_DEBUG_OPTIMIZATION_LEVEL}")
   endif ()
 
-  if (MSVC_DEBUG_FLAGS)
+  if (MSVC AND MSVC_DEBUG_FLAGS)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${MSVC_DEBUG_FLAGS}")
   endif ()
 
