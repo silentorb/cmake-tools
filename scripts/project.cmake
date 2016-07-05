@@ -18,11 +18,9 @@ macro(create_target target is_executable)
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -${GCC_DEBUG_OPTIMIZATION_LEVEL}")
   endif ()
 
-  if (MSVC_DEBUG_FLAGS)
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${MSVC_DEBUG_FLAGS}")
-  endif ()
-
   set(CURRENT_TARGET ${target})
+  set(LOCAL_TARGET ${target})
+
   if (NOT "${PROJECT_NAME}" STREQUAL ${target})
     add_project(${target})
   endif ()
@@ -65,7 +63,9 @@ macro(create_target target is_executable)
     endif ()
   endif ()
 
-  include_directories(${CMAKE_TOOLS}/include) # for dllexport
+  if (COMMAND on_create_target)
+    on_create_target()
+  endif ()
 
   if (IOS)
     set_xcode_property(${target} IPHONEOS_DEPLOYMENT_TARGET "8.4")
@@ -87,6 +87,10 @@ macro(create_executable target)
   create_target(${target} TRUE)
 endmacro(create_executable)
 
+macro(create_header_library target)
+  set(${target}_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "${target} path")
+endmacro(create_header_library)
+
 macro(get_relative_path result root_path path)
   string(LENGTH "${root_path}" string_length)
   math(EXPR string_length "${string_length} + 1")
@@ -94,47 +98,36 @@ macro(get_relative_path result root_path path)
 endmacro(get_relative_path)
 
 macro(create_test target)
-  set(LAST_TARGET ${CURRENT_TARGET})
-  set(CURRENT_TARGET ${target})
-
-  file(GLOB_RECURSE SOURCES test/*.cpp test/*.h)
-  add_executable(${target} ${SOURCES})
-
-  include_directories(
-    ${CMAKE_CURRENT_LIST_DIR}/test
-  )
-
-  if (NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    string(LENGTH "${CMAKE_SOURCE_DIR}" string_length)
-    math(EXPR string_length "${string_length} + 1")
-    string(SUBSTRING ${CMAKE_CURRENT_SOURCE_DIR} ${string_length} -1 current_path)
-    get_filename_component(current_path ${current_path} DIRECTORY)
-    set_target_properties(${target} PROPERTIES FOLDER ${current_path})
+  if (MINGW)
+    create_executable(${target})
+    link_external_static(googletest gtest)
+    target_link_libraries(${target} "${MYTHIC_DEPENDENCIES}/googletest/lib/libgtest_main.a")
   endif ()
-
-  require(${LAST_TEST})
-
 endmacro(create_test)
 
 macro(require)
-  foreach (library_name ${ARGN})
-    #    message("${PROJECT_NAME} require ${library_name}")
-    find_package(${library_name} REQUIRED)
+  if (LOCAL_TARGET)
+    foreach (library_name ${ARGN})
+      #          message(WARNING "${PROJECT_NAME} require ${library_name}")
+      find_package(${library_name} REQUIRED)
 
-    if (IOS OR ANDROID)
-      target_link_libraries(${CURRENT_TARGET}
-        $<TARGET_FILE:${library_name}>
-        )
-    else ()
-      target_link_libraries(${CURRENT_TARGET}
-        $<TARGET_LINKER_FILE:${library_name}>
-        )
-    endif ()
+      if (TARGET ${library_name})
+        if (IOS)
+          target_link_libraries(${CURRENT_TARGET}
+            $<TARGET_FILE:${library_name}>
+            )
+        else ()
+          target_link_libraries(${CURRENT_TARGET}
+            $<TARGET_LINKER_FILE:${library_name}>
+            )
+        endif ()
 
-    add_dependencies(${CURRENT_TARGET}
-      ${library_name}
-      )
-  endforeach ()
+        add_dependencies(${CURRENT_TARGET}
+          ${library_name}
+          )
+      endif ()
+    endforeach ()
+  endif ()
 endmacro()
 
 if (IOS)

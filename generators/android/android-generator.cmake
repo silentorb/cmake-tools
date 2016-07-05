@@ -26,7 +26,7 @@ foreach (target ${all_libraries})
     endif ()
   endforeach ()
 endforeach ()
-message("Libraries: ${all_libraries}")
+#message("Libraries: ${all_libraries}")
 foreach (target ${all_libraries})
 
   list(REMOVE_DUPLICATES ${target}_includes)
@@ -100,8 +100,8 @@ configure_file(
 )
 
 configure_file(
-  ${CMAKE_CURRENT_LIST_DIR}/templates/debug.bat
-  ${CMAKE_BINARY_DIR}/debug.bat
+  ${CMAKE_CURRENT_LIST_DIR}/templates/debug.ps1
+  ${CMAKE_BINARY_DIR}/debug.ps1
 )
 
 configure_file(
