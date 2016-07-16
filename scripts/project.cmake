@@ -45,6 +45,10 @@ macro(create_target target is_executable)
     set(SOURCES ${ARGN})
   endif ()
 
+  if (COMMAND on_enumerate_target_sources)
+    on_enumerate_target_sources()
+  endif ()
+
   if (${is_executable} AND ANDROID)
     add_library(${target} SHARED ${SOURCES})
   elseif (${is_executable})
@@ -81,6 +85,8 @@ endmacro(create_target)
 
 macro(create_library target)
   create_target(${target} FALSE)
+  string(TOUPPER "${CURRENT_TARGET}" UPPER_CURRENT_TARGET)
+  add_definitions("-D${UPPER_CURRENT_TARGET}_LIB")
 endmacro(create_library)
 
 macro(create_executable target)
