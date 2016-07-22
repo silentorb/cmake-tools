@@ -139,6 +139,10 @@ macro(create_library target)
 
   include_directories(${CMAKE_TOOLS}/include) # for dllexport
 
+  if (COMMAND on_create_target)
+    on_create_target()
+  endif ()
+
 endmacro(create_library)
 
 macro(get_relative_path result root_path path)
