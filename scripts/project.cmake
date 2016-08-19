@@ -115,7 +115,11 @@ macro(require)
   if (LOCAL_TARGET)
     foreach (library_name ${ARGN})
       #          message(WARNING "${PROJECT_NAME} require ${library_name}")
-      find_package(${library_name} REQUIRED)
+      if (${library_name}_includes)
+        include_directories(${${library_name}_includes})
+      else ()
+        find_package(${library_name} REQUIRED)
+      endif ()
 
       if (TARGET ${library_name})
         if (IOS)
@@ -178,13 +182,20 @@ else ()
 
     project(${project_name})
 
-    if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-      set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR})
-    else ()
-      set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR} PARENT_SCOPE)
-    endif ()
+    if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${project_name}-config.cmake")
+      if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+        set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR})
+      else ()
+        set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR} PARENT_SCOPE)
+      endif ()
 
-    include(${project_name}-config.cmake OPTIONAL)
+      include(${project_name}-config.cmake OPTIONAL)
+
+    else ()
+      message(${project_name}_includes " ${CMAKE_CURRENT_LIST_DIR}/source")
+      set(${project_name}_includes "${CMAKE_CURRENT_LIST_DIR}/source" PARENT_SCOPE)
+      include_directories(${CMAKE_CURRENT_LIST_DIR}/source)
+    endif ()
 
   endmacro(add_project)
 
@@ -202,7 +213,6 @@ else ()
   endmacro(require_package)
 
 endif ()
-
 
 macro(add name)
   add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/${name})
