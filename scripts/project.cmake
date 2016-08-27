@@ -109,15 +109,26 @@ macro(create_test target)
   endif ()
 endmacro(create_test)
 
+macro(include_project library_name)
+  if (${library_name}_includes)
+    include_directories(${${library_name}_includes})
+  else ()
+    #    message("${library_name}_DIR ${${library_name}_DIR}")
+#    find_package(${library_name} REQUIRED)
+    include(${${library_name}_DIR}/${library_name}-config.cmake)
+  endif ()
+  set(temp ${${library_name}_dependencies})
+
+  foreach (dependency IN LISTS temp)
+        include_project(${dependency})
+  endforeach ()
+endmacro()
+
 macro(require)
   if (LOCAL_TARGET)
     foreach (library_name ${ARGN})
       #          message(WARNING "${PROJECT_NAME} require ${library_name}")
-      if (${library_name}_includes)
-        include_directories(${${library_name}_includes})
-      else ()
-        find_package(${library_name} REQUIRED)
-      endif ()
+      include_project(${library_name})
 
       if (TARGET ${library_name})
         if (IOS)
@@ -134,7 +145,7 @@ macro(require)
           ${library_name}
           )
         list(APPEND "${CURRENT_TARGET}_dependencies" "${library_name}")
-#        message("${${CURRENT_TARGET}_dependencies}")
+        #        message("${${CURRENT_TARGET}_dependencies}")
         set(${CURRENT_TARGET}_dependencies ${${CURRENT_TARGET}_dependencies} PARENT_SCOPE)
       endif ()
     endforeach ()
@@ -142,38 +153,15 @@ macro(require)
 endmacro()
 
 if (IOS)
-
   macro(add_project project_name)
     message(STATUS "ios ${project_name}")
     #include(${CMAKE_SOURCE_DIR}/toolchains/ios.cmake)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
     project(${project_name})
-
     set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR} PARENT_SCOPE)
-
     include(${project_name}-config.cmake)
   endmacro(add_project)
-
-  #  macro(create_library target)
-  #    add_library(${target} ${ARGN})
-  #    set_xcode_property(${target} IPHONEOS_DEPLOYMENT_TARGET "8.0")
-  #  endmacro(create_library)
-
-  macro(require_package project_name library_name)
-    find_package(${library_name} REQUIRED)
-
-    target_link_libraries(${project_name}
-      $<TARGET_FILE:${library_name}>
-      )
-
-    add_dependencies(${project_name}
-      ${library_name}
-      )
-
-  endmacro(require_package)
-
 else ()
 
   macro(add_project project_name)
@@ -182,15 +170,17 @@ else ()
     endif ()
 
     project(${project_name})
-
+#    message("project ${project_name}")
     if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${project_name}-config.cmake")
-      if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-        set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR})
-      else ()
-        set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR} PARENT_SCOPE)
-      endif ()
+#      message(${CMAKE_CURRENT_LIST_DIR}/${project_name}-config.cmake)
+#      if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+        set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "${project_name} dir")
+#      else ()
+#        set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR} PARENT_SCOPE)
+#      endif ()
+#      message("${project_name}_DIR ${${project_name}_DIR}")
 
-      include(${project_name}-config.cmake OPTIONAL)
+      include(${project_name}-config.cmake)
 
     else ()
       set(${project_name}_includes "${CMAKE_CURRENT_LIST_DIR}/source" PARENT_SCOPE)
@@ -198,19 +188,6 @@ else ()
     endif ()
 
   endmacro(add_project)
-
-  macro(require_package project_name library_name)
-    find_package(${library_name} REQUIRED)
-
-    target_link_libraries(${project_name}
-      $<TARGET_LINKER_FILE:${library_name}>
-      )
-
-    add_dependencies(${project_name}
-      ${library_name}
-      )
-
-  endmacro(require_package)
 
 endif ()
 
