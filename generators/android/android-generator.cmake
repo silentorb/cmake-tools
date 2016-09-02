@@ -1,3 +1,4 @@
+message("Running generator")
 
 #  message("a ${quartz_sources}")
 set(android_includes "${ANDROID_MK_HEADER}")

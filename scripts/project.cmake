@@ -94,7 +94,11 @@ macro(create_executable target)
 endmacro(create_executable)
 
 macro(create_header_library target)
-  set(${target}_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "${target} path")
+  if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${project_name}-config.cmake")
+    set(${target}_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "${target} path")
+  else ()
+    set(${target}_includes "${CMAKE_CURRENT_LIST_DIR}/source" PARENT_SCOPE)
+  endif ()
 endmacro(create_header_library)
 
 macro(get_relative_path result root_path path)
@@ -129,18 +133,9 @@ else ()
     endif ()
 
     project(${project_name})
-    #    message("project ${project_name}")
     if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${project_name}-config.cmake")
-      #      message(${CMAKE_CURRENT_LIST_DIR}/${project_name}-config.cmake)
-      #      if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
       set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "${project_name} dir")
-      #      else ()
-      #        set(${project_name}_DIR ${CMAKE_CURRENT_LIST_DIR} PARENT_SCOPE)
-      #      endif ()
-      #      message("${project_name}_DIR ${${project_name}_DIR}")
-
       include(${project_name}-config.cmake)
-
     else ()
       set(${project_name}_includes "${CMAKE_CURRENT_LIST_DIR}/source" PARENT_SCOPE)
       include_directories(${CMAKE_CURRENT_LIST_DIR}/source)
@@ -218,9 +213,9 @@ macro(add_resources resources_dir)
 
 endmacro(add_resources)
 
-macro(finish_mythic)
+macro(finish_cmake)
 
-endmacro(finish_mythic)
+endmacro(finish_cmake)
 
 macro(add_sources)
   target_sources(${CURRENT_TARGET} PUBLIC ${ARGN})
