@@ -29,20 +29,22 @@ foreach (target ${all_libraries})
 endforeach ()
 #message("Libraries: ${all_libraries}")
 foreach (target ${all_libraries})
-
-  list(REMOVE_DUPLICATES ${target}_includes)
+#  message("${target}_includes ${${target}_includes}")
+  if (NOT "${${target}_includes}" STREQUAL "")
+    list(REMOVE_DUPLICATES ${target}_includes)
+  endif ()
 
   set(target_sources "")
 
   foreach (inc ${${target}_sources})
     get_filename_component(extension ${inc} EXT)
-#      message("${inc}  ---  ${extension}")
+    #      message("${inc}  ---  ${extension}")
     if ("${extension}" STREQUAL ".c" OR "${extension}" STREQUAL ".cpp")
       set(target_sources "${target_sources} ${inc}")
     endif ()
   endforeach ()
 
-#  list_to_string(target_sources "${${target}_sources}")
+  #  list_to_string(target_sources "${${target}_sources}")
   list_to_string(target_includes "${${target}_includes}")
   list_to_string(target_defines "${${target}_defines}")
 
@@ -59,7 +61,7 @@ foreach (target ${all_libraries})
   endforeach ()
 
   #  message("library ${target}  ${${target}_libraries}")
-#  message("defines ${target}  ${${target}_defines}")
+  #  message("defines ${target}  ${${target}_defines}")
 
   if (${${target}_is_executable})
     set(template_name front)
