@@ -520,9 +520,9 @@ macro(link_external path)
 
       doctor_dynamic(dllname ${fullpath})
       #      message(WARNING "${CURRENT_TARGET} ${fullpath}/${dllname}")
-      add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${fullpath}/${dllname} $<TARGET_FILE_DIR:${CURRENT_TARGET}>
-        )
+#      add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E copy ${fullpath}/${dllname} $<TARGET_FILE_DIR:${CURRENT_TARGET}>
+#        )
     endif ()
   endif ()
 endmacro()

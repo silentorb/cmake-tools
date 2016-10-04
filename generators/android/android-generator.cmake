@@ -6,6 +6,8 @@ if (ANDROID_DEPENDENCIES)
   set(android_includes "${android_includes}include ${ANDROID_DEPENDENCIES}/Android.mk")
 endif ()
 
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/src)
+
 set(all_resources "")
 
 macro(list_to_string variable list)
