@@ -260,7 +260,7 @@ macro(include_external_directory path)
   else ()
     set(include_suffix "/${include_suffix}")
   endif ()
-message("${CURRENT_TARGET} ${MYTHIC_DEPENDENCIES}/${path}/include${include_suffix}")
+#message("${CURRENT_TARGET} ${MYTHIC_DEPENDENCIES}/${path}/include${include_suffix}")
   include_directories(${MYTHIC_DEPENDENCIES}/${path}/include${include_suffix})
 
 endmacro()
