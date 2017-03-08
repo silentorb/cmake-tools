@@ -88,6 +88,9 @@ macro(create_library target)
 endmacro(create_library)
 
 macro(create_executable target)
+  if (NOT "${PROJECT_NAME}" STREQUAL ${target})
+    project(${target})
+  endif ()
   create_target(${target} TRUE)
 endmacro(create_executable)
 
@@ -120,7 +123,6 @@ macro(add_project project_name)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
   endif ()
 
-  project(${project_name})
   if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${project_name}-config.cmake")
     set(${project_name}_project_path ${CMAKE_CURRENT_LIST_DIR})
     set(${project_name}_project_path ${CMAKE_CURRENT_LIST_DIR} PARENT_SCOPE)
