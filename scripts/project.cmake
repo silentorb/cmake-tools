@@ -62,7 +62,14 @@ macro(create_target target is_executable)
     math(EXPR string_length "${string_length} + 1")
     string(SUBSTRING ${CMAKE_CURRENT_SOURCE_DIR} ${string_length} -1 current_path)
     get_filename_component(current_path ${current_path} DIRECTORY)
+    get_filename_component(parent_path ${current_path} NAME)
+
+    if (parent_path IN_LIST ALL_PROJECTS)
+      get_filename_component(current_path ${current_path} DIRECTORY)
+    endif ()
+
     set_target_properties(${target} PROPERTIES FOLDER ${current_path})
+    message("${target} PROPERTIES FOLDER ${current_path}")
   endif ()
 
   if (COMMAND on_create_target)
@@ -108,9 +115,9 @@ macro(get_relative_path result root_path path)
 endmacro(get_relative_path)
 
 macro(create_test target)
+  create_executable(${target})
+  link_external_static(googletest gtest)
   if (MINGW)
-    create_executable(${target})
-    link_external_static(googletest gtest)
     target_link_libraries(${target} "${MYTHIC_DEPENDENCIES}/googletest/lib/libgtest_main.a")
   endif ()
 endmacro(create_test)
@@ -282,13 +289,7 @@ macro(require)
       if (TARGET ${library_name})
         add_dependencies(${CURRENT_TARGET} ${library_name})
       endif ()
-
-      #      list(APPEND "${CURRENT_TARGET}_dependencies" "${library_name}")
-      #      set(${CURRENT_TARGET}_dependencies ${${CURRENT_TARGET}_dependencies} PARENT_SCOPE)
     endforeach ()
-
-    list(APPEND "${CURRENT_TARGET}_dependencies" "${ARGN}")
-    set(${CURRENT_TARGET}_dependencies ${${CURRENT_TARGET}_dependencies} PARENT_SCOPE)
 
     if (IS_EXECUTABLE)
       if (${CURRENT_TARGET}_external_libraries)
@@ -296,10 +297,11 @@ macro(require)
       endif ()
     endif ()
 
-  else ()
-    list(APPEND "${CURRENT_TARGET}_dependencies" "${ARGN}")
-    set(${CURRENT_TARGET}_dependencies ${${CURRENT_TARGET}_dependencies} PARENT_SCOPE)
   endif ()
+
+  list(APPEND "${CURRENT_TARGET}_dependencies" "${ARGN}")
+  set(${CURRENT_TARGET}_dependencies ${${CURRENT_TARGET}_dependencies} PARENT_SCOPE)
+
 endmacro()
 
 macro(doctor varname path name extension)
