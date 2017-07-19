@@ -9,7 +9,7 @@ function(platform_build_external key generator)
     set(generator_flag "-G")
   endif ()
 
-  execute_process(COMMAND cmake ${generator_flag} ${generator} -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/bin/${key} ../../cmake
+  execute_process(COMMAND ${CMAKE_COMMAND} ${generator_flag} ${generator} -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/bin/${key} ../../cmake
     WORKING_DIRECTORY ${build_path}
     RESULT_VARIABLE output
     )
@@ -20,7 +20,7 @@ function(platform_build_external key generator)
     set(config_value RELWITHDEBINFO)
   endif ()
 
-  execute_process(COMMAND cmake --build . ${config_flag} ${config_value}
+  execute_process(COMMAND ${CMAKE_COMMAND} --build . ${config_flag} ${config_value}
     WORKING_DIRECTORY ${build_path}
     RESULT_VARIABLE output
     )
