@@ -9,7 +9,9 @@ function(platform_build_external key generator)
     set(generator_flag "-G")
   endif ()
 
-  execute_process(COMMAND ${CMAKE_COMMAND} ${generator_flag} ${generator} -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/bin/${key} ../../cmake
+  execute_process(COMMAND ${CMAKE_COMMAND} ${generator_flag} ${generator}
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/bin/${key} ../../cmake
+    -Dtoolset=${key}
     WORKING_DIRECTORY ${build_path}
     RESULT_VARIABLE output
     )
