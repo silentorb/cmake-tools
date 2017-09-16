@@ -147,39 +147,35 @@ endmacro(add)
 macro(add_resources resources_dir)
 
   file(GLOB_RECURSE BUNDLE_RESOURCES ${resources_dir}/*)
-  if (IOS_NOT_USING_ANYMORE)
-    # add_executable("${CURRENT_TARGET}_resources" MACOSX_BUNDLE ${BUNDLE_RESOURCES})
-    add_library("${CURRENT_TARGET}_resources" ${BUNDLE_RESOURCES})
-    get_filename_component(base_path ${resources_dir} ABSOLUTE)
+  list(GET CURRENT_SOURCES 0 FIRST_SOURCE)
+  set_source_files_properties(${FIRST_SOURCE} PROPERTIES OBJECT_DEPENDS "${BUNDLE_RESOURCES}")
 
-    foreach (resource_path ${BUNDLE_RESOURCES})
-      get_filename_component(resource_dir ${resource_path} DIRECTORY)
-      get_relative_path(relative_dir ${base_path} ${resource_dir})
-    endforeach ()
+  if (IOS)
+    add_custom_command(TARGET ${CURRENT_TARGET}
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} ${CMAKE_BINARY_DIR}/${resources_dir}
+      COMMENT "Copying ${CURRENT_TARGET} files"
+      )
 
-    set_target_properties("${CURRENT_TARGET}_resources" PROPERTIES LINKER_LANGUAGE C)
-    set_target_properties("${CURRENT_TARGET}_resources" PROPERTIES BUNDLE_EXTENSION "bundle")
-    set_xcode_property(${CURRENT_TARGET}_resources IPHONEOS_DEPLOYMENT_TARGET "8.4")
-    set(ALL_RESOURCES "${ALL_RESOURCES} BUNDLE_RESOURCES" PARENT_SCOPE)
-
+  elseif (MSVC)
+    add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_CURRENT_LIST_DIR}/${resources_dir}
+      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug/${resources_dir}
+      COMMENT "Copying ${CURRENT_TARGET} files"
+      )
+    add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_CURRENT_LIST_DIR}/${resources_dir}
+      ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/${resources_dir}
+      COMMENT "Copying ${CURRENT_TARGET} files"
+      )
   else ()
-    list(GET CURRENT_SOURCES 0 FIRST_SOURCE)
-    set_source_files_properties(${FIRST_SOURCE} PROPERTIES OBJECT_DEPENDS "${BUNDLE_RESOURCES}")
-
-    if (IOS)
-      add_custom_command(TARGET ${CURRENT_TARGET}
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} ${CMAKE_BINARY_DIR}/${resources_dir}
-        COMMENT "Copying ${CURRENT_TARGET} files"
-        )
-
-    else ()
-      add_custom_command(TARGET ${CURRENT_TARGET}
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${resources_dir}
-        COMMENT "Copying ${CURRENT_TARGET} files"
-        )
-    endif ()
+    add_custom_command(TARGET ${CURRENT_TARGET} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+      ${CMAKE_CURRENT_LIST_DIR}/${resources_dir} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${resources_dir}
+      COMMENT "Copying ${CURRENT_TARGET} files"
+      )
   endif ()
 
 endmacro(add_resources)
