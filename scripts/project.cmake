@@ -157,10 +157,10 @@ macro(add_project project_name)
 endmacro(add_project)
 
 macro(add name)
-  if (EXISTS ${CMAKE_CURRENT_LIST_DIR}/${name}/${name}.cmake)
-    include(${CMAKE_CURRENT_LIST_DIR}/${name}/${name}.cmake)
-  else ()
+  if (EXISTS "${CMAKE_CURRENT_LIST_DIR}/${name}/CMakeLists.txt")
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/${name})
+  else ()
+    include(${CMAKE_CURRENT_LIST_DIR}/${name}/${name}.cmake)
   endif ()
 endmacro(add)
 
