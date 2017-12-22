@@ -29,9 +29,9 @@ macro(create_target target is_executable is_shared)
     add_project(${target})
   endif ()
 
-  if (MINGW)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreturn-type")
-  endif ()
+#  if (MINGW)
+#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreturn-type")
+#  endif ()
 
   if ("${ARGN}" STREQUAL "")
     if (IOS)
@@ -262,6 +262,10 @@ macro(require)
   if (LOCAL_TARGET)
     get_dependency_hierarchy("${ARGN}" all_dependencies)
 
+    foreach (library_name ${ARGN})
+      include_project(${library_name})
+    endforeach ()
+
     if (IS_EXECUTABLE)
       foreach (library_name ${all_dependencies})
         if (TARGET ${library_name})
@@ -271,7 +275,7 @@ macro(require)
     endif ()
 
     foreach (library_name ${all_dependencies})
-      include_project(${library_name})
+#      include_project(${library_name})
 
       if (TARGET ${library_name} AND IS_EXECUTABLE)
 
@@ -318,7 +322,10 @@ macro(require)
 
   list(APPEND "${CURRENT_TARGET}_dependencies" "${ARGN}")
   set(${CURRENT_TARGET}_dependencies ${${CURRENT_TARGET}_dependencies} PARENT_SCOPE)
-
+  get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+#  foreach(dir ${dirs})
+#    message(STATUS "${CURRENT_TARGET} - '${dir}'")
+#  endforeach()
 endmacro()
 
 macro(doctor varname path name extension)
